@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<% include ../partials/head.ejs %>
+
+<body data-sa-theme="5">
+<% include ../partials/header.ejs %>
+<% include ../partials/sidebar.ejs %>
+
+<section class="content">
+    <div class="content__inner">
+        <header class="content__title">
+            <h1><%= i18n.__('Championship') %></h1>
+        </header>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive data-table">
+                    <table id="data-table" class="table table-bordered text-center">
+                        <thead>
+                        <tr>
+                            <th style="color: yellow">Active Championships</th>
+                            <th style="color: yellow">Current Championships</th>
+                            <th style="color: yellow">Finished Championships</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>
+                                <a data-toggle="collapse" href="#collapseExample">
+                                    Champ of september
+                                </a>
+                            </td>
+                            <td>
+                                <a data-toggle="collapse" href="#collapseExample1">
+                                    lios champ
+                                </a>
+                            </td>
+                            <td>
+                                <a data-toggle="collapse" href="#collapseExample2">
+                                    Champ of oct
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a data-toggle="collapse" href="#collapseExample">
+                                    champ of activtraders
+                                </a>
+                            </td>
+                            <td>
+                                <a data-toggle="collapse" href="#collapseExample1">
+                                    diamont champ
+                                </a>
+                            </td>
+                            <td>
+                                <a data-toggle="collapse" href="#collapseExample2">
+                                    champ of june
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a data-toggle="collapse" href="#collapseExample">
+                                    champ of the champs
+                                </a>
+                            </td>
+                            <td>
+                                <a data-toggle="collapse" href="#collapseExample1">
+                                    test champ
+                                </a>
+                            </td>
+                            <td>
+                                <a data-toggle="collapse" href="#collapseExample2">
+                                    year champ
+                                </a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="accordion" id="accordionExample">
+                        <div class="collapse text-center" id="collapseExample" data-parent="#accordionExample">
+                            <hr>
+
+                            <div class="card card-body w-50" style="display: inline-block;">
+                                <h3 class="card-title" style="color: red;">Champ of September</h3>
+                                <button type="button" class="btn btn-warning btn-sm">Click for see the rules</button>
+                                <form class="row text-left">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label>Number Account</label>
+                                            <input type="text" class="form-control" placeholder="e.g: 123456">
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Password</label>
+                                            <input type="password" class="form-control" placeholder="password">
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Server</label>
+                                            <select class="form-control">
+                                                <option style="background: black">ACTIV</option>
+                                                <option style="background: black">LMAX</option>
+                                                <option style="background: black">SAXO</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Platform</label>
+                                            <select class="form-control">
+                                                <option style="background: black">MT4</option>
+                                                <option style="background: black">MT5</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </form>
+                                <button type="button" class="btn btn-success btn-lg">Register</button>
+                            </div>
+                        </div>
+                        <div class="collapse text-center" id="collapseExample1" data-parent="#accordionExample">
+                            <hr>
+
+                            <div class="card card-body w-100" style="display: inline-block;">
+                                <h3 class="card-title" style="color: red;">Ranking of Test Champ</h3>
+                                <p>Last update: 5hours ago</p>
+                                <table id="data-table" class="table table-bordered">
+                                    <thead>
+                                    <tr>
+                                        <th style="color: yellow">Position</th>
+                                        <th style="color: yellow">Number Account</th>
+                                        <th style="color: yellow">Balance</th>
+                                        <th style="color: yellow">Performance</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr>
+                                        <td>1</td>
+                                        <td>12345678</td>
+                                        <td>$ 10.500,00</td>
+                                        <td>
+                                            <a href="#">Click for see</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>2</td>
+                                        <td>12345678</td>
+                                        <td>$ 10.500,00</td>
+                                        <td>
+                                            <a href="#">Click for see</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>3</td>
+                                        <td>12345678</td>
+                                        <td>$ 10.500,00</td>
+                                        <td>
+                                            <a href="#">Click for see</a>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="collapse text-center" id="collapseExample2" data-parent="#accordionExample" style="text-align: center;">
+                            <hr>
+
+                            <div class="card card-body w-100" style="display: inline-block;">
+                                <h3 class="card-title" style="color: red;">Champ of June</h3>
+                                <table id="data-table" class="table table-bordered">
+                                    <thead>
+                                    <tr>
+                                        <th style="color: yellow">Position</th>
+                                        <th style="color: yellow">Number Account</th>
+                                        <th style="color: yellow">Balance</th>
+                                        <th style="color: yellow">Performance</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr>
+                                        <td>1</td>
+                                        <td>12345678</td>
+                                        <td>$ 10.500,00</td>
+                                        <td>
+                                            <a href="#">Click for see</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>2</td>
+                                        <td>12345678</td>
+                                        <td>$ 10.500,00</td>
+                                        <td>
+                                            <a href="#">Click for see</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>3</td>
+                                        <td>12345678</td>
+                                        <td>$ 10.500,00</td>
+                                        <td>
+                                            <a href="#">Click for see</a>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                                <div style="display: inline-block;white-space: nowrap;width: auto;">
+                                    <div class="input-group mb-3">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text" style="color: yellow;"><i class="zwicon-coin"></i>Champ Name:</span>
+                                        </div>
+                                        <input type="text" class="form-control" readonly value="Wasley Abraao">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<% include ../partials/footer.ejs %>
+<% include ../partials/foot.ejs %>
+
+</body>
+</html>

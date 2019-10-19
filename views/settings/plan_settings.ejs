@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="en">
+<% include ../partials/head.ejs %>
+<style>
+    #data-normal-plan-table th, #data-normal-plan-table td {
+        text-align: center;
+    }
+    .select2-container--open{
+        z-index: 9999;
+    }
+</style>
+<body data-sa-theme="5">
+<% include ../partials/header.ejs %>
+<% include ../partials/sidebar.ejs %>
+
+<section class="content">
+    <div class="content__inner">
+        <header class="content__title">
+            <h1><%= i18n.__('Plan Settings') %></h1>
+        </header>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="tab-container">
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-toggle="tab" href="#normal_plan" role="tab"><%= i18n.__('Normal Plan') %></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#approval_plan" role="tab"><%= i18n.__('Approval Plan') %></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#currency_pairs" role="tab"><%= i18n.__('Currency Pairs') %></a>
+                        </li>
+                    </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane  active fade show" id="normal_plan" role="tabpanel">
+                            <div class="py-3 text-right">
+                                <button type="button" class="btn btn-success" onclick="addNewNormalPlan()">Register New Plan</button>
+                            </div>
+                            <div class="table-responsive data-table">
+                                <table id="data-normal-plan-table" class="table table-bordered">
+                                    <thead>
+                                    <tr>
+                                        <th style="color: yellow">Name</th>
+                                        <th style="color: yellow">Price</th>
+                                        <th style="color: yellow">Min Lot</th>
+                                        <th style="color: yellow">Max Lot</th>
+                                        <th style="color: yellow">Max Daily Profit(USD)</th>
+                                        <th style="color: yellow">Max Daily Loss(USD)</th>
+                                        <th style="color: yellow">Daily Loss Fix</th>
+                                        <th style="color: yellow">Max Total Profit(USD)</th>
+                                        <th style="color: yellow">Max Total Loss(USD)</th>
+                                        <th style="color: yellow">Total Loss Fix)</th>
+                                        <th style="color: yellow">Max Orders / Lot</th>
+                                        <th style="color: yellow">Comment</th>
+                                        <th style="color: yellow">Pairs</th>
+                                        <th style="color: yellow">Use Pre-Approval</th>
+                                        <th style="color: yellow">USD for Pre-Approval</th>
+                                        <th style="color: yellow">Approval Plan</th>
+                                        <th style="color: yellow">Validity Period(days)</th>
+                                        <th style="color: yellow">Active Outside Control</th>
+                                        <th style="color: yellow">Edit</th>
+                                        <th style="color: yellow">Remove</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="normal_plan_list">
+                                    <% for (let i = 0; i < plans.length; i++){%>
+                                        <tr id="<%= plans[i].id %>">
+                                            <input type="hidden" class="normal_approval_plan_id" value="<%= plans[i].approval_plan_id%>">
+                                            <td class="normal_name"><%= plans[i].name%></td>
+                                            <td class="normal_price"><%= plans[i].price%></td>
+                                            <td class="normal_min_lot"><%= plans[i].min_lot%></td>
+                                            <td class="normal_max_lot"><%= plans[i].max_lot%></td>
+                                            <td class="normal_max_daily_profit"><%= plans[i].max_daily_profit%></td>
+                                            <td class="normal_max_daily_loss"><%= plans[i].max_daily_loss%></td>
+                                            <td class="normal_daily_loss_fix"><%= plans[i].daily_loss_fix%></td>
+                                            <td class="normal_max_total_profit"><%= plans[i].max_total_profit%></td>
+                                            <td class="normal_max_total_loss"><%= plans[i].max_total_loss%></td>
+                                            <td class="normal_total_loss_fix"><%= plans[i].total_loss_fix%></td>
+                                            <td class="normal_max_orders"><%= plans[i].max_orders%></td>
+                                            <td class="normal_comment"><%= plans[i].comment%></td>
+                                            <td class="normal_pairs"><%= plans[i].currency_pair%></td>
+                                            <td class="normal_use_pre_approval"><%= plans[i].use_pre_approval%></td>
+                                            <td class="normal_usd_for_pre_approval"><%= plans[i].usd_for_pre_approval%></td>
+                                            <td class="normal_approval_plan_name">
+                                                <% if(ApprovalPlans.find(x => x.id == plans[i].approval_plan_id)) {%>
+                                                    <%= ApprovalPlans.find(x => x.id == plans[i].approval_plan_id).name%>
+                                                <%}%>
+                                            </td>
+                                            <td class="normal_validity_period"><%= plans[i].validity_period%></td>
+                                            <td class="normal_outside_control_flag"><%= plans[i].outside_control_flag%></td>
+                                            <td><a href="#" onclick="editNormalPlan('<%= plans[i].id%>')">Edit</a></td>
+                                            <td><a href="#" onclick="removeNormalPlan('<%= plans[i].id%>')">Remove</a></td>
+                                        </tr>
+                                    <% }%>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="approval_plan" role="tabpanel">
+                            <div class="py-3 text-right">
+                                <button type="button" class="btn btn-success" onclick="addNewApprovalPlan()">New Approval Plan</button>
+                            </div>
+                            <div class="table-responsive data-table">
+                                <table id="data-approval-plan-table" class="table table-bordered text-center">
+                                    <thead>
+                                    <tr>
+                                        <th style="color: yellow">Name</th>
+                                        <th style="color: yellow">Min Lot</th>
+                                        <th style="color: yellow">Max Lot</th>
+                                        <th style="color: yellow">Max Daily Profit(USD)</th>
+                                        <th style="color: yellow">Max Daily Loss(USD)</th>
+                                        <th style="color: yellow">Max Total Profit(USD)</th>
+                                        <th style="color: yellow">Max Total Loss(USD)</th>
+                                        <th style="color: yellow">Max Orders / Lot</th>
+                                        <th style="color: yellow">Comment</th>
+                                        <th style="color: yellow">Pairs</th>
+                                        <th style="color: yellow">Edit</th>
+                                        <th style="color: yellow">Remove</th>
+
+                                    </tr>
+                                    </thead>
+                                    <tbody id="approval_plan_list">
+                                    <% for (let i = 0; i < ApprovalPlans.length; i++) {%>
+                                    <tr id="<%= ApprovalPlans[i].id %>">
+                                        <td class="approval_name"><%= ApprovalPlans[i].name%></td>
+                                        <td class="approval_min_lot"><%= ApprovalPlans[i].min_lot%></td>
+                                        <td class="approval_max_lot"><%= ApprovalPlans[i].max_lot%></td>
+                                        <td class="approval_daily_profit"><%= ApprovalPlans[i].max_daily_profit%></td>
+                                        <td class="approval_daily_loss"><%= ApprovalPlans[i].max_daily_loss%></td>
+                                        <td class="approval_max_total_profit"><%= ApprovalPlans[i].max_total_profit%></td>
+                                        <td class="approval_max_total_loss"><%= ApprovalPlans[i].max_total_loss%></td>
+                                        <td class="approval_max_orders"><%= ApprovalPlans[i].max_orders%></td>
+                                        <td class="approval_comment"><%= ApprovalPlans[i].comment%></td>
+                                        <td class="approval_pairs"><%= ApprovalPlans[i].currency_pair%></td>
+                                        <td><a href="#" onclick="editApprovalPlan('<%= ApprovalPlans[i].id%>')">Edit</a></td>
+                                        <td><a href="#" onclick="removeApprovalPlan('<%= ApprovalPlans[i].id%>')">Remove</a></td>
+                                    </tr>
+                                    <% }%>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="tab-pane text-center" id="currency_pairs" role="tabpanel">
+                            <div class="w-50" style="display: inline-block;">
+                                <div class="py-3 text-right">
+                                    <button type="button" class="btn btn-success" onclick="addPair()">New Currency Pair</button>
+                                </div>
+                                <div>
+                                    <table id="data-pair-table" class="table table-bordered text-center">
+                                        <thead>
+                                        <tr>
+                                            <th style="color: yellow">Name</th>
+                                            <th style="color: yellow">Remove</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody id='currency_pair_list'>
+                                        <% for (let i = 0; i < currencypairs.length; i++) { %>
+                                            <tr id="<%= currencypairs[i].id %>">
+                                                <td><%= currencypairs[i].name %></td>
+                                                <td><a href="#" onclick='removePair("<%= currencypairs[i].id %>")'>Remove</a> </td>
+                                            </tr>
+                                        <% } %>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Add New Plan -->
+<div class="modal fade" id="modal-new-normal-plan" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-new-normal-title"></h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <input type="hidden" id="normal_plan_edit_type" value="">
+                    <input type="hidden" id="new_normal_plan_id" value="">
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Name</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <input type="text" class="form-control" id="new_normal_name" placeholder="Name" required />
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Price</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <input type="number" class="form-control" id="new_normal_price" placeholder="Price" required />
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Min Lot</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <input type="number" class="form-control" id="new_normal_min_lot" placeholder="Min Lot" required />
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Max Lot</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <input type="number" class="form-control" id="new_normal_max_lot" placeholder="Max Lot" required />
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Max Daily Profit(USD)</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <input type="number" class="form-control" id="new_normal_max_daily_profit" placeholder="Max Daily Profit" required />
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Max Daily Loss(USD)</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <input type="number" class="form-control" id="new_normal_max_daily_loss" placeholder="Max Daily Loss" required />
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Daily Loss FIX</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <select class="form-control" id="new_normal_daily_loss_fix" style="background: black;" required />
+                                    <option value="true">True</option>
+                                    <option value="false">False</option>
+                                </select>
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Max Total Profit(USD)</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <input type="number" class="form-control" id="new_normal_max_total_profit" placeholder="Max Total Profit" required />
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Max Total Loss(USD)</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <input type="number" class="form-control" id="new_normal_max_total_loss" placeholder="Max Total Loss" required />
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Total Loss FIX</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <select class="form-control" id="new_normal_total_loss_fix" style="background: black;" required />
+                                    <option value="true">True</option>
+                                    <option value="false">False</option>
+                                </select>
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Max Orders / Lot</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <input type="number" class="form-control" id="new_normal_max_orders" placeholder="Max Orders / Lot" required />
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Comment</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <input type="text" class="form-control" id="new_normal_comment" placeholder="Comment">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Pairs</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <select class="form-control select2-selection--multiple pairs-multiple" id="new_normal_pairs" multiple="multiple" style="background: black; width:100%;">
+                                    <% for (let i = 0; i < currencypairs.length; i++) {%>
+                                        <option><%= currencypairs[i].name%></option>
+                                    <% }%>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Use Pre-Approval</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <select class="form-control" id="new_normal_use_pre_approval" style="background: black;" required />
+                                    <option value="true">True</option>
+                                    <option value="false">False</option>
+                                </select>
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">USD For Pre-Approval</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <input type="number" class="form-control" id="new_normal_usd_for_pre_approval" placeholder="USD For Pre-Approval" required />
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Approval Plan</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <select class="form-control" id="new_normal_approval_plan" style="background: black; width:100%;" required />
+                                    <% for (let i = 0; i < ApprovalPlans.length; i++) {%>
+                                        <option value="<%= ApprovalPlans[i].id%>"><%= ApprovalPlans[i].name%></option>
+                                    <% }%>
+                                </select>
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Validity Period(days)</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <input type="number" class="form-control" id="new_normal_validity_period" placeholder="Validity Period" required />
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Active Outside Control</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <select class="form-control" id="new_normal_outside_control_flag" style="background: black;" required />
+                                    <option value="true">True</option>
+                                    <option value="false">False</option>
+                                </select>
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-theme" id="btn_new_normal_plan" onclick="submitNewNormalPlan()"></button>
+                <button type="button" class="btn btn-theme" data-dismiss="modal"><%= i18n.__('Cancel') %></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add New Approval Plan -->
+<div class="modal fade" id="modal-new-approval-plan" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-new-approval-title"></h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <input type="hidden" id="approval_plan_edit_type" value="">
+                    <input type="hidden" id="new_approval_plan_id" value="">
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Name</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <input type="text" class="form-control" id="new_approval_name" placeholder="Name" required />
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Min Lot</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <input type="number" class="form-control" id="new_approval_min_lot" placeholder="Min Lot" required />
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Max Lot</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <input type="number" class="form-control" id="new_approval_max_lot" placeholder="Max Lot" required />
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Max Daily Profit(USD)</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <input type="number" class="form-control" id="new_approval_daily_profit" placeholder="Max Daily Profit" required />
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Max Daily Loss(USD)</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <input type="number" class="form-control" id="new_approval_daily_loss" placeholder="Max Daily Loss" required />
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Max Total Profit(USD)</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <input type="number" class="form-control" id="new_approval_max_total_profit" placeholder="Max Total Profit" required />
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Max Total Loss(USD)</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <input type="number" class="form-control" id="new_approval_max_total_loss" placeholder="Max Total Loss" required />
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Max Orders / Lot</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <input type="number" class="form-control" id="new_approval_max_orders" placeholder="Max Orders / Lot" required />
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Comment</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <input type="text" class="form-control" id="new_approval_comment" placeholder="Comment">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Pairs</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <select class="form-control select2-selection--multiple pairs-multiple" id="new_approval_pairs" multiple="multiple" style="background: black; width:100%;">
+                                    <% for (let i = 0; i < currencypairs.length; i++) {%>
+                                        <option><%= currencypairs[i].name%></option>
+                                    <% }%>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-theme" id="btn_new_approval_plan" onclick="submitNewApprovalPlan()"></button>
+                <button type="button" class="btn btn-theme" data-dismiss="modal"><%= i18n.__('Cancel') %></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add New Currency Pairs -->
+<div class="modal fade" id="modal-new-pair" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">New Currency Pair</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Currency Pair Name</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <input type="text" class="form-control" id="currency_pair" placeholder="Currency Pair Name" required />
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-theme" onclick="submitAddCurrencyPair()"><%= i18n.__('Add Pair') %></button>
+                <button type="button" class="btn btn-theme" data-dismiss="modal"><%= i18n.__('Cancel') %></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- remove modal -->
+<div class="modal fade" id="modal_delete_message" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header"></div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <i class="zwicon-info-circle" style="font-size: 7rem"></i>
+                </div>
+                <div class="form-group">
+                    <h3><%= i18n.__('Are you sure to remove?') %></h3>
+                </div>
+                <input type="hidden" id="modal_delete_type">
+                <input type="hidden" id="modal_delete_id">
+                <button type="button" class="btn btn-link" onclick="onDeleteBtn()"><%= i18n.__('Remove')%></button>
+                <button type="button" class="btn btn-link" data-dismiss="modal"><%= i18n.__('Cancel') %></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<% include ../partials/footer.ejs %>
+<% include ../partials/foot.ejs %>
+<script>
+    $(document).ready(function () {
+        $("#data-normal-plan-table").DataTable({
+            aaSorting: [],
+            autoWidth: !1,
+            responsive: !0,
+            lengthMenu: [[15, 40, 100, -1], ["15 Rows", "40 Rows", "100 Rows", "Everything"]],
+            language: {searchPlaceholder: "Search for records..."},
+            sDom: '<"dataTables__top"flB<"dataTables_actions">>rt<"dataTables__bottom"ip><"clear">',
+            buttons: [{extend: "excelHtml5", title: "Export Data"}, {extend: "csvHtml5", title: "Export Data"}, {extend: "print", title: "Material Admin"}],
+            initComplete: function () {
+                let html = '<i class="zwicon-more-h" data-toggle="dropdown"></i>' +
+                    '<div class="dropdown-menu dropdown-menu-right">' +
+                    // '<a data-table-action="print" class="dropdown-item">Print</a>' +
+                    '<a data-table-action="fullscreen" class="dropdown-item">Fullscreen</a>' +
+                    // '<a data-table-action="excel" class="dropdown-item">Excel (.xlsx)</a>' +
+                    // '<a data-table-action="csv" class="dropdown-item">CSV (.csv)</a>' +
+                    '</div>';
+                $(".dataTables_actions").html(html)
+            }
+        });
+        $("#data-approval-plan-table").DataTable({
+            aaSorting: [],
+            autoWidth: !1,
+            responsive: !0,
+            lengthMenu: [[15, 40, 100, -1], ["15 Rows", "40 Rows", "100 Rows", "Everything"]],
+            language: {searchPlaceholder: "Search for records..."},
+            sDom: '<"dataTables__top"flB<"dataTables_actions">>rt<"dataTables__bottom"ip><"clear">',
+            buttons: [{extend: "excelHtml5", title: "Export Data"}, {extend: "csvHtml5", title: "Export Data"}, {extend: "print", title: "Material Admin"}],
+            initComplete: function () {
+                let html = '<i class="zwicon-more-h" data-toggle="dropdown"></i>' +
+                    '<div class="dropdown-menu dropdown-menu-right">' +
+                    // '<a data-table-action="print" class="dropdown-item">Print</a>' +
+                    '<a data-table-action="fullscreen" class="dropdown-item">Fullscreen</a>' +
+                    // '<a data-table-action="excel" class="dropdown-item">Excel (.xlsx)</a>' +
+                    // '<a data-table-action="csv" class="dropdown-item">CSV (.csv)</a>' +
+                    '</div>';
+                $(".dataTables_actions").html(html)
+            }
+        });
+        $("#data-pair-table").DataTable({
+            aaSorting: [],
+            autoWidth: !1,
+            responsive: !0,
+            lengthMenu: [[15, 40, 100, -1], ["15 Rows", "40 Rows", "100 Rows", "Everything"]],
+            language: {searchPlaceholder: "Search for records..."},
+            sDom: '<"dataTables__top"flB<"dataTables_actions">>rt<"dataTables__bottom"ip><"clear">',
+            buttons: [{extend: "excelHtml5", title: "Export Data"}, {extend: "csvHtml5", title: "Export Data"}, {extend: "print", title: "Material Admin"}],
+            initComplete: function () {
+                let html = '<i class="zwicon-more-h" data-toggle="dropdown"></i>' +
+                    '<div class="dropdown-menu dropdown-menu-right">' +
+                    // '<a data-table-action="print" class="dropdown-item">Print</a>' +
+                    '<a data-table-action="fullscreen" class="dropdown-item">Fullscreen</a>' +
+                    // '<a data-table-action="excel" class="dropdown-item">Excel (.xlsx)</a>' +
+                    // '<a data-table-action="csv" class="dropdown-item">CSV (.csv)</a>' +
+                    '</div>';
+                $(".dataTables_actions").html(html)
+            }
+        });
+        $("body").on("click", "[data-table-action]", function (e) {
+            e.preventDefault();
+            var t = $(this).data("table-action");
+            if ("excel" === t && $("#bookmark-table_wrapper").find(".buttons-excel").click(), "csv" === t && $("#bookmark-table_wrapper").find(".buttons-csv").click(), "print" === t && $("#bookmark-table_wrapper").find(".buttons-print").click(), "fullscreen" === t) {
+                var a = $(this).closest(".card");
+                a.hasClass("card--fullscreen") ? (a.removeClass("card--fullscreen"), $('body').removeClass("data-table-toggled")) : (a.addClass("card--fullscreen"), $('body').addClass("data-table-toggled"))
+            }
+        });
+
+        $(".pairs-multiple").select2();
+    });
+    let ApprovalPlans = JSON.parse(`<%- JSON.stringify(ApprovalPlans) %>`);
+    let IsApprovalPlansChanged = false;
+    let IsCurrencyPairsChanged = false;
+
+    function addNewNormalPlan(){
+        if (IsCurrencyPairsChanged || IsApprovalPlansChanged)
+        {
+            customAlert("Refreshing....\nCurrencyPairs or Approval Plans changed!");
+            setTimeout(function () {
+                location.reload();
+            }, 2000);
+            return;
+        }
+
+        $('#modal-new-normal-plan').find('input, select').each(function () {
+            if ($(this).prop('required')){
+                $(this).removeClass('is-invalid');
+            }
+        });
+
+
+        $('#new_normal_plan_id').val("");
+        $('.modal-new-normal-title').html("<%= i18n.__('New Plan') %>");
+        $('#btn_new_normal_plan').html("<%= i18n.__('New Plan') %>");
+        $('#normal_plan_edit_type').val("add");
+        $('#modal-new-normal-plan').modal();
+    }
+    function editNormalPlan(normalPlanID){
+        if (IsCurrencyPairsChanged || IsApprovalPlansChanged)
+        {
+            customAlert("Refreshing....\nCurrencyPairs or Approval Plans changed!");
+            setTimeout(function () {
+                location.reload();
+            }, 2000);
+            return;
+        }
+
+        $('#modal-new-normal-plan').find('input, select').each(function () {
+            if ($(this).prop('required')){
+                $(this).removeClass('is-invalid');
+            }
+        });
+
+        $('#new_normal_plan_id').val(normalPlanID);
+        
+        $('#new_normal_name').val($('#' + normalPlanID + ' .normal_name').html());
+        $('#new_normal_price').val($('#' + normalPlanID + ' .normal_price').html());
+        $('#new_normal_min_lot').val($('#' + normalPlanID + ' .normal_min_lot').html());
+        $('#new_normal_max_lot').val($('#' + normalPlanID + ' .normal_max_lot').html());
+        $('#new_normal_max_daily_profit').val($('#' + normalPlanID + ' .normal_max_daily_profit').html());
+        $('#new_normal_max_daily_loss').val($('#' + normalPlanID + ' .normal_max_daily_loss').html());
+        $('#new_normal_daily_loss_fix').val($('#' + normalPlanID + ' .normal_daily_loss_fix').html());
+        $('#new_normal_max_total_profit').val($('#' + normalPlanID + ' .normal_max_total_profit').html());
+        $('#new_normal_max_total_loss').val($('#' + normalPlanID + ' .normal_max_total_loss').html());
+        $('#new_normal_total_loss_fix').val($('#' + normalPlanID + ' .normal_total_loss_fix').html());
+        $('#new_normal_max_orders').val($('#' + normalPlanID + ' .normal_max_orders').html());
+        $('#new_normal_comment').val($('#' + normalPlanID + ' .normal_comment').html());
+        $('#new_normal_pairs').val($('#' + normalPlanID + ' .normal_pairs').html());
+        $('#new_normal_use_pre_approval').val($('#' + normalPlanID + ' .normal_use_pre_approval').html());
+        $('#new_normal_usd_for_pre_approval').val($('#' + normalPlanID + ' .normal_usd_for_pre_approval').html());
+        $('#new_normal_approval_plan').val($('#' + normalPlanID + ' .normal_approval_plan_id').val());
+        $('#new_normal_validity_period').val($('#' + normalPlanID + ' .normal_validity_period').html());
+        $('#new_normal_outside_control_flag').val($('#' + normalPlanID + ' .normal_outside_control_flag').html());
+
+        let str_pair = "[" + $('#' + normalPlanID + ' .normal_pairs').html() + "]";
+        $('#new_normal_pairs').val(str_pair.slice(1, -1).split(',')).select2();
+
+        $('.modal-new-normal-title').html("<%= i18n.__('Edit Plan') %>");
+        $('#btn_new_normal_plan').html("<%= i18n.__('Edit Plan') %>");
+        $('#normal_plan_edit_type').val("edit");
+        $('#modal-new-normal-plan').modal();
+    }
+    function removeNormalPlan(normalPlanID){
+        $('#modal_delete_type').val("normal_plan");
+        $('#modal_delete_id').val(normalPlanID);
+        $('#modal_delete_message').modal();
+    }
+    function submitNewNormalPlan() {
+        let bValid = true;
+        $('#modal-new-normal-plan').find('input, select').each(function () {
+            if ($(this).prop('required') && ($(this).val()==null || $(this).val()=="")){
+                $(this).addClass('is-invalid');
+                bValid = false;
+            } else {
+                $(this).removeClass('is-invalid');
+            }
+        });
+        if (!bValid) return;
+
+        let new_normal_plan_id              = $('#new_normal_plan_id').val();
+        let new_normal_name                 = $('#new_normal_name').val();
+        let new_normal_price                = $('#new_normal_price').val();
+        let new_normal_min_lot              = $('#new_normal_min_lot').val();
+        let new_normal_max_lot              = $('#new_normal_max_lot').val();
+        let new_normal_max_daily_profit     = $('#new_normal_max_daily_profit').val();
+        let new_normal_max_daily_loss       = $('#new_normal_max_daily_loss').val();
+        let new_normal_daily_loss_fix       = $('#new_normal_daily_loss_fix').val();
+        let new_normal_max_total_profit     = $('#new_normal_max_total_profit').val();
+        let new_normal_max_total_loss       = $('#new_normal_max_total_loss').val();
+        let new_normal_total_loss_fix       = $('#new_normal_total_loss_fix').val();
+        let new_normal_max_orders           = $('#new_normal_max_orders').val();
+        let new_normal_comment              = $('#new_normal_comment').val();
+        let new_normal_pairs                = $('#new_normal_pairs').val();
+        let new_normal_use_pre_approval     = $('#new_normal_use_pre_approval').val();
+        let new_normal_usd_for_pre_approval = $('#new_normal_usd_for_pre_approval').val();
+        let new_normal_approval_plan        = $('#new_normal_approval_plan').val();
+        let new_normal_validity_period      = $('#new_normal_validity_period').val();
+        let new_normal_outside_control_flag = $('#new_normal_outside_control_flag').val();
+
+        let url = '/user/editPlan';
+
+        if ($('#normal_plan_edit_type').val() == "add") {
+            let data = {
+                normal_planid: new_normal_plan_id,
+                new_normal_name: new_normal_name,
+                new_normal_price: new_normal_price,
+                new_normal_min_lot: new_normal_min_lot,
+                new_normal_max_lot: new_normal_max_lot,
+                new_normal_max_daily_profit: new_normal_max_daily_profit,
+                new_normal_max_daily_loss: new_normal_max_daily_loss,
+                new_normal_daily_loss_fix: new_normal_daily_loss_fix,
+                new_normal_max_total_profit: new_normal_max_total_profit,
+                new_normal_max_total_loss: new_normal_max_total_loss,
+                new_normal_total_loss_fix: new_normal_total_loss_fix,
+                new_normal_max_orders: new_normal_max_orders,
+                new_normal_comment: new_normal_comment,
+                new_normal_pairs: new_normal_pairs,
+                new_normal_use_pre_approval: new_normal_use_pre_approval,
+                new_normal_usd_for_pre_approval: new_normal_usd_for_pre_approval,
+                new_normal_approval_plan: new_normal_approval_plan,
+                new_normal_validity_period: new_normal_validity_period,
+                new_normal_outside_control_flag: new_normal_outside_control_flag,
+
+                type: 'add',
+            };
+
+            $.ajax({
+                url: url,
+                method: 'post',
+                data: data,
+                success: function (res) {
+                    if (res.status === 'success') {
+                        let new_normal_plan = res.new_normal_plan;
+                        customAlert(res.message, true);
+
+                        let approval_plan_name = "";
+                        if (ApprovalPlans.find(x => x.id == new_normal_plan.approval_plan_id)) {
+                            approval_plan_name = ApprovalPlans.find(x => x.id == new_normal_plan.approval_plan_id).name;
+                        }
+                        $('#normal_plan_list .odd[role!="row"]').remove();
+                        $('#normal_plan_list').append(
+                            '<tr id="'+ new_normal_plan.id +'">\n' +
+                            '<input type="hidden" class="normal_approval_plan_id" value="' + new_normal_plan.approval_plan_id + '">\n' +
+                            '<td class="normal_name">'+ new_normal_plan.name +'</td>\n' +
+                            '<td class="normal_price">'+ new_normal_plan.price +'</td>\n' +
+                            '<td class="normal_min_lot">'+ new_normal_plan.min_lot +'</td>\n' +
+                            '<td class="normal_max_lot">'+ new_normal_plan.max_lot +'</td>\n' +
+                            '<td class="normal_max_daily_profit">'+ new_normal_plan.max_daily_profit +'</td>\n' +
+                            '<td class="normal_max_daily_loss">'+ new_normal_plan.max_daily_loss +'</td>\n' +
+                            '<td class="normal_daily_loss_fix">'+ new_normal_plan.daily_loss_fix +'</td>\n' +
+                            '<td class="normal_max_total_profit">'+ new_normal_plan.max_total_profit +'</td>\n' +
+                            '<td class="normal_max_total_loss">'+ new_normal_plan.max_total_loss +'</td>\n' +
+                            '<td class="normal_total_loss_fix">'+ new_normal_plan.total_loss_fix +'</td>\n' +
+                            '<td class="normal_max_orders">'+ new_normal_plan.max_orders +'</td>\n' +
+                            '<td class="normal_comment">'+ new_normal_plan.comment +'</td>\n' +
+                            '<td class="normal_pairs">'+ new_normal_plan.currency_pair +'</td>\n' +
+                            '<td class="normal_use_pre_approval">'+ new_normal_plan.use_pre_approval +'</td>\n' +
+                            '<td class="normal_usd_for_pre_approval">'+ new_normal_plan.usd_for_pre_approval +'</td>\n' +
+                            '<td class="normal_approval_plan_name">' + approval_plan_name +'</td>\n' +
+                            '<td class="normal_validity_period">'+ new_normal_plan.validity_period +'</td>\n' +
+                            '<td class="normal_outside_control_flag">'+ new_normal_plan.outside_control_flag +'</td>\n' +
+                            '<td><a href="#" onclick="editNormalPlan(\''+ new_normal_plan.id +'\')">Edit</a> </td>\n' +
+                            '<td><a href="#" onclick="removeNormalPlan(\''+ new_normal_plan.id +'\')">Remove</a> </td>\n' +
+                            '</tr>');
+                        $('#modal-new-normal-plan').modal("hide");
+                        // setTimeout(function () {
+                        //     location.reload();
+                        // }, 500);
+                    } else customAlert(res.message);
+                }
+            })
+        }
+
+        if ($('#normal_plan_edit_type').val() == "edit") {
+            let data = {
+                normal_planid: new_normal_plan_id,
+                new_normal_name: new_normal_name,
+                new_normal_price: new_normal_price,
+                new_normal_min_lot: new_normal_min_lot,
+                new_normal_max_lot: new_normal_max_lot,
+                new_normal_max_daily_profit: new_normal_max_daily_profit,
+                new_normal_max_daily_loss: new_normal_max_daily_loss,
+                new_normal_daily_loss_fix: new_normal_daily_loss_fix,
+                new_normal_max_total_profit: new_normal_max_total_profit,
+                new_normal_max_total_loss: new_normal_max_total_loss,
+                new_normal_total_loss_fix: new_normal_total_loss_fix,
+                new_normal_max_orders: new_normal_max_orders,
+                new_normal_comment: new_normal_comment,
+                new_normal_pairs: new_normal_pairs,
+                new_normal_use_pre_approval: new_normal_use_pre_approval,
+                new_normal_usd_for_pre_approval: new_normal_usd_for_pre_approval,
+                new_normal_approval_plan: new_normal_approval_plan,
+                new_normal_validity_period: new_normal_validity_period,
+                new_normal_outside_control_flag: new_normal_outside_control_flag,
+
+                type: 'edit',
+            };
+
+            $.ajax({
+                url: url,
+                method: 'post',
+                data: data,
+                success: function (res) {
+                    if (res.status === 'success') {
+                        let edit_plan = res.edit_plan;
+                        customAlert(res.message, true);
+
+                        $('#' + edit_plan.id + ' .normal_approval_plan_id     ').val(edit_plan.approval_plan_id);
+                        $('#' + edit_plan.id + ' .normal_name                 ').html(edit_plan.name                );
+                        $('#' + edit_plan.id + ' .normal_price                ').html(edit_plan.price               );
+                        $('#' + edit_plan.id + ' .normal_min_lot              ').html(edit_plan.min_lot             );
+                        $('#' + edit_plan.id + ' .normal_max_lot              ').html(edit_plan.max_lot             );
+                        $('#' + edit_plan.id + ' .normal_daily_profit         ').html(edit_plan.max_daily_profit    );
+                        $('#' + edit_plan.id + ' .normal_daily_loss           ').html(edit_plan.max_daily_loss      );
+                        $('#' + edit_plan.id + ' .normal_daily_loss_fix       ').html(edit_plan.daily_loss_fix      );
+                        $('#' + edit_plan.id + ' .normal_max_total_profit     ').html(edit_plan.max_total_profit    );
+                        $('#' + edit_plan.id + ' .normal_max_total_loss       ').html(edit_plan.max_total_loss      );
+                        $('#' + edit_plan.id + ' .normal_total_loss_fix       ').html(edit_plan.total_loss_fix      );
+                        $('#' + edit_plan.id + ' .normal_max_orders           ').html(edit_plan.max_orders          );
+                        $('#' + edit_plan.id + ' .normal_comment              ').html(edit_plan.comment             );
+                        $('#' + edit_plan.id + ' .normal_pairs                ').html(edit_plan.currency_pair.toString());
+                        $('#' + edit_plan.id + ' .normal_use_pre_approval     ').html(edit_plan.use_pre_approval    );
+                        $('#' + edit_plan.id + ' .normal_usd_for_pre_approval ').html(edit_plan.usd_for_pre_approval);
+                        if (ApprovalPlans.find(x => x.id == edit_plan.approval_plan_id))
+                            $('#' + edit_plan.id + ' .normal_approval_plan_name   ').html(ApprovalPlans.find(x => x.id == edit_plan.approval_plan_id).name);
+                        $('#' + edit_plan.id + ' .normal_validity_period      ').html(edit_plan.validity_period     );
+                        $('#' + edit_plan.id + ' .normal_outside_control_flag ').html(edit_plan.outside_control_flag);
+
+                        $('#modal-new-normal-plan').modal("hide");
+                        // setTimeout(function () {
+                        //     location.reload();
+                        // }, 500);
+                    } else customAlert(res.message);
+                }
+            })
+        }
+
+    }
+
+    //About Currency Pairs
+    function addPair() {
+        $('#modal-new-pair').find('input, select').each(function () {
+            if ($(this).prop('required')){
+                $(this).removeClass('is-invalid');
+            }
+        });
+        $('#modal-new-pair').modal();
+    }
+    function removePair(pairID) {
+        $('#modal_delete_type').val("currency_pair");
+        $('#modal_delete_id').val(pairID);
+        $('#modal_delete_message').modal();
+    }
+    function submitAddCurrencyPair() {
+        let bValid = true;
+        $('#modal-new-pair').find('input, select').each(function () {
+            if ($(this).prop('required') && ($(this).val()==null || $(this).val()=="")){
+                $(this).addClass('is-invalid');
+                bValid = false;
+            } else {
+                $(this).removeClass('is-invalid');
+            }
+        });
+        if (!bValid) return;
+
+        let currency_pair = $('#currency_pair').val();
+        let url = '/user/editCurrencyPair';
+        let data = {
+            currency_pair: currency_pair,
+            type: 'add',
+        };
+        $.ajax({
+            url: url,
+            method: 'post',
+            data: data,
+            success: function (res) {
+                if (res.status === 'success') {
+                    let new_pair = res.new_pair;
+                    customAlert(res.message, true);
+                    $('#currency_pair_list .odd[role!="row"]').remove();
+                    $('#currency_pair_list').append(
+                        '<tr id="'+ new_pair.id +'">\n' +
+                        '<td>'+ new_pair.name +'</td>\n' +
+                        '<td><a href="#" onclick=\'removePair("'+ new_pair.id +'")\'>Remove</a> </td>\n' +
+                        '</tr>');
+                    $('#modal-new-pair').modal("hide");
+                    IsCurrencyPairsChanged = true;
+                } else customAlert(res.message);
+            }
+        })
+    }
+    //About Approval Plans
+    function addNewApprovalPlan(){
+        if (IsCurrencyPairsChanged)
+        {
+            customAlert("Refreshing....\nCurrencyPairs are changed!")
+            setTimeout(function () {
+                location.reload();
+            }, 2000);
+            return;
+        }
+
+        $('#modal-new-approval-plan').find('input, select').each(function () {
+            if ($(this).prop('required')){
+                $(this).removeClass('is-invalid');
+            }
+        });
+
+        $('#new_approval_plan_id').val("");
+        $('.modal-new-approval-title').html("<%= i18n.__('New Approval Plan') %>");
+        $('#btn_new_approval_plan').html("<%= i18n.__('New Approval Plan') %>");
+        $('#approval_plan_edit_type').val("add");
+        $('#modal-new-approval-plan').modal();
+    }
+    function editApprovalPlan(approvalPlanID){
+        if (IsCurrencyPairsChanged)
+        {
+            customAlert("Refreshing....\nCurrencyPairs are changed!")
+            setTimeout(function () {
+                location.reload();
+            }, 2000);
+            return;
+        }
+
+        $('#modal-new-approval-plan').find('input, select').each(function () {
+            if ($(this).prop('required')){
+                $(this).removeClass('is-invalid');
+            }
+        });
+
+        $('#new_approval_plan_id').val(approvalPlanID);
+        $('#new_approval_name').val($('#' + approvalPlanID + ' .approval_name').html());
+        $('#new_approval_min_lot').val($('#' + approvalPlanID + ' .approval_min_lot').html());
+        $('#new_approval_max_lot').val($('#' + approvalPlanID + ' .approval_max_lot').html());
+        $('#new_approval_daily_profit').val($('#' + approvalPlanID + ' .approval_daily_profit').html());
+        $('#new_approval_daily_loss').val($('#' + approvalPlanID + ' .approval_daily_loss').html());
+        $('#new_approval_max_total_profit').val($('#' + approvalPlanID + ' .approval_max_total_profit').html());
+        $('#new_approval_max_total_loss').val($('#' + approvalPlanID + ' .approval_max_total_loss').html());
+        $('#new_approval_max_orders').val($('#' + approvalPlanID + ' .approval_max_orders').html());
+        $('#new_approval_comment').val($('#' + approvalPlanID + ' .approval_comment').html());
+        let str_pair = "[" + $('#' + approvalPlanID + ' .approval_pairs').html() + "]";
+        $('#new_approval_pairs').val(str_pair.slice(1, -1).split(',')).select2();
+
+        $('.modal-new-approval-title').html("<%= i18n.__('Edit Approval Plan') %>");
+        $('#btn_new_approval_plan').html("<%= i18n.__('Edit Approval Plan') %>");
+        $('#approval_plan_edit_type').val("edit");
+        $('#modal-new-approval-plan').modal();
+    }
+    function removeApprovalPlan(approvalPlanID){
+        $('#modal_delete_type').val("approval_plan");
+        $('#modal_delete_id').val(approvalPlanID);
+        $('#modal_delete_message').modal();
+    }
+    function submitNewApprovalPlan() {
+        let bValid = true;
+        $('#modal-new-approval-plan').find('input, select').each(function () {
+            if ($(this).prop('required') && ($(this).val()==null || $(this).val()=="")){
+                $(this).addClass('is-invalid');
+                bValid = false;
+            } else {
+                $(this).removeClass('is-invalid');
+            }
+        });
+        if (!bValid) return;
+
+        let new_approval_id = $('#new_approval_plan_id').val();
+        let new_approval_name = $('#new_approval_name').val();
+        let new_approval_min_lot = $('#new_approval_min_lot').val();
+        let new_approval_max_lot = $('#new_approval_max_lot').val();
+        let new_approval_daily_profit = $('#new_approval_daily_profit').val();
+        let new_approval_daily_loss = $('#new_approval_daily_loss').val();
+        let new_approval_max_total_profit = $('#new_approval_max_total_profit').val();
+        let new_approval_max_total_loss = $('#new_approval_max_total_loss').val();
+        let new_approval_max_orders = $('#new_approval_max_orders').val();
+        let new_approval_comment = $('#new_approval_comment').val();
+        let new_approval_pairs = $('#new_approval_pairs').val();
+
+        let url = '/user/editApprovalPlan';
+
+        if ($('#approval_plan_edit_type').val() == "add")
+        {
+            let data = {
+                approval_planid: new_approval_id,
+                new_approval_name: new_approval_name,
+                new_approval_min_lot: new_approval_min_lot,
+                new_approval_max_lot: new_approval_max_lot,
+                new_approval_daily_profit: new_approval_daily_profit,
+                new_approval_daily_loss: new_approval_daily_loss,
+                new_approval_max_total_profit: new_approval_max_total_profit,
+                new_approval_max_total_loss: new_approval_max_total_loss,
+                new_approval_max_orders: new_approval_max_orders,
+                new_approval_comment: new_approval_comment,
+                new_approval_pairs: new_approval_pairs,
+
+                type: 'add',
+            };
+
+            $.ajax({
+                url: url,
+                method: 'post',
+                data: data,
+                success: function (res) {
+                    if (res.status === 'success') {
+                        let new_approval_plan = res.new_approval_plan;
+                        customAlert(res.message, true);
+                        $('#approval_plan_list .odd[role!="row"]').remove();
+                        $('#approval_plan_list').append(
+                            '<tr id="'+ new_approval_plan.id +'">\n' +
+                            '<td class="approval_name">'+ new_approval_plan.name +'</td>\n' +
+                            '<td class="approval_min_lot">'+ new_approval_plan.min_lot +'</td>\n' +
+                            '<td class="approval_max_lot">'+ new_approval_plan.max_lot +'</td>\n' +
+                            '<td class="approval_daily_profit">'+ new_approval_plan.max_daily_profit +'</td>\n' +
+                            '<td class="approval_daily_loss">'+ new_approval_plan.max_daily_loss +'</td>\n' +
+                            '<td class="approval_max_total_profit">'+ new_approval_plan.max_total_profit +'</td>\n' +
+                            '<td class="approval_max_total_loss">'+ new_approval_plan.max_total_loss +'</td>\n' +
+                            '<td class="approval_max_orders">'+ new_approval_plan.max_orders +'</td>\n' +
+                            '<td class="approval_comment">'+ new_approval_plan.comment +'</td>\n' +
+                            '<td class="approval_pairs">'+ new_approval_plan.currency_pair +'</td>\n' +
+                            '<td><a href="#" onclick="editApprovalPlan(\''+ new_approval_plan.id +'\')">Edit</a> </td>\n' +
+                            '<td><a href="#" onclick="removeApprovalPlan(\''+ new_approval_plan.id +'\')">Remove</a> </td>\n' +
+                            '</tr>');
+                        $('#modal-new-approval-plan').modal("hide");
+                        IsApprovalPlansChanged = true;
+                    } else customAlert(res.message);
+                }
+            })
+        }
+
+        if ($('#approval_plan_edit_type').val() == "edit")
+        {
+            let data = {
+                approval_planid: new_approval_id,
+                new_approval_name: new_approval_name,
+                new_approval_min_lot: new_approval_min_lot,
+                new_approval_max_lot: new_approval_max_lot,
+                new_approval_daily_profit: new_approval_daily_profit,
+                new_approval_daily_loss: new_approval_daily_loss,
+                new_approval_max_total_profit: new_approval_max_total_profit,
+                new_approval_max_total_loss: new_approval_max_total_loss,
+                new_approval_max_orders: new_approval_max_orders,
+                new_approval_comment: new_approval_comment,
+                new_approval_pairs: new_approval_pairs,
+
+                type: 'edit',
+            };
+
+            $.ajax({
+                url: url,
+                method: 'post',
+                data: data,
+                success: function (res) {
+                    if (res.status === 'success') {
+                        let edit_approval_plan = res.edit_approval_plan;
+                        customAlert(res.message, true);
+                        $('#' + edit_approval_plan.id + ' .approval_name').html(edit_approval_plan.name);
+                        $('#' + edit_approval_plan.id + ' .approval_min_lot').html(edit_approval_plan.min_lot);
+                        $('#' + edit_approval_plan.id + ' .approval_max_lot').html(edit_approval_plan.max_lot);
+                        $('#' + edit_approval_plan.id + ' .approval_daily_profit').html(edit_approval_plan.max_daily_profit);
+                        $('#' + edit_approval_plan.id + ' .approval_daily_loss').html(edit_approval_plan.max_daily_loss);
+                        $('#' + edit_approval_plan.id + ' .approval_max_total_profit').html(edit_approval_plan.max_total_profit);
+                        $('#' + edit_approval_plan.id + ' .approval_max_total_loss').html(edit_approval_plan.max_total_loss);
+                        $('#' + edit_approval_plan.id + ' .approval_max_orders').html(edit_approval_plan.max_orders);
+                        $('#' + edit_approval_plan.id + ' .approval_comment').html(edit_approval_plan.comment);
+                        $('#' + edit_approval_plan.id + ' .approval_pairs').html(edit_approval_plan.currency_pair.toString());
+
+                        $('#modal-new-approval-plan').modal("hide");
+                        IsApprovalPlansChanged = true;
+                    } else customAlert(res.message);
+                }
+            })
+        }
+    }
+
+    function onDeleteBtn() {
+        if ($('#modal_delete_type').val() == "normal_plan")
+        {
+            let normal_planid = $('#modal_delete_id').val();
+            let url = '/user/editPlan';
+            let data = {
+                normal_planid: normal_planid,
+                type: 'delete',
+            };
+            $.ajax({
+                url: url,
+                method: 'post',
+                data: data,
+                success: function (res) {
+                    if (res.status === 'success') {
+                        customAlert(res.message, true);
+                        $('#' + normal_planid).remove();
+                        $('#modal_delete_message').modal("hide");
+                        // setTimeout(function () {
+                        //     //location.reload();
+                        // }, 500)
+                    } else customAlert(res.message);
+                }
+            })
+        }
+        if ($('#modal_delete_type').val() == "currency_pair")
+        {
+            let currency_pairid = $('#modal_delete_id').val();
+            let url = '/user/editCurrencyPair';
+            let data = {
+                currency_pairid: currency_pairid,
+                type: 'delete',
+            };
+            $.ajax({
+                url: url,
+                method: 'post',
+                data: data,
+                success: function (res) {
+                    if (res.status === 'success') {
+                        customAlert(res.message, true);
+                        $('#' + currency_pairid).remove();
+                        $('#modal_delete_message').modal("hide");
+                        IsCurrencyPairsChanged = true;
+                    } else customAlert(res.message);
+                }
+            })
+        }
+        if ($('#modal_delete_type').val() == "approval_plan")
+        {
+            let approval_planid = $('#modal_delete_id').val();
+            let url = '/user/editApprovalPlan';
+            let data = {
+                approval_planid: approval_planid,
+                type: 'delete',
+            };
+            $.ajax({
+                url: url,
+                method: 'post',
+                data: data,
+                success: function (res) {
+                    if (res.status === 'success') {
+                        customAlert(res.message, true);
+                        $('#' + approval_planid).remove();
+                        $('#modal_delete_message').modal("hide");
+                        IsApprovalPlansChanged = true;
+                    } else customAlert(res.message);
+                }
+            })
+        }
+    }
+
+</script>
+</body>
+</html>

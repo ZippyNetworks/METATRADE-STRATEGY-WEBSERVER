@@ -1,0 +1,141 @@
+<aside class="sidebar ">
+    <div class="scrollbar">
+        <div class="user">
+            <div class="user__info">
+                <img class="user__img" src="<%= user.avatar %>" alt="ECAT Logo">
+                <div style="word-break: break-all">
+                    <div class="user__name"><%= user.first_name %> <%= user.last_name %></div>
+                    <div class="user__email"><%= user.email %></div>
+                    <div>Multistore Pro: <%= (user.multiStorePro == 2)?'Yes':'No' %></div>
+                </div>
+            </div>
+        </div>
+
+        <ul class="navigation">
+            <li class="<%= (tab_text == 'home')?'navigation__active':'' %>">
+                <a href="/"><i class="zwicon-home"></i> <%= i18n.__('Home') %></a>
+            </li>
+            <% if(session.group && session.group.permissions && session.group.permissions.indexOf(15) > -1) { %>
+            <li class="<%= (tab_text == 'messages')?'navigation__active':'' %>">
+                <a href="/messages"><i class="zwicon-mail"></i> <%= i18n.__('Messages') %></a>
+            </li>
+            <%}%>
+
+            <% if(session.group && session.group.permissions && session.group.permissions.indexOf(4) > -1) { %>
+            <li class="<%= (tab_text == 'metatrader_accounts')?'navigation__active':'' %>">
+                <a href="/metatrader-accounts"><i class="zwicon-bill"></i> <%= i18n.__('MetaTrader Accounts') %></a>
+            </li>
+            <%}%>
+
+            <% if(session.group && session.group.permissions && session.group.permissions.indexOf(6) > -1) { %>
+            <li class="<%= (tab_text === 'championship')?'navigation__active':'' %>">
+                <a href="/championship"><i class="zwicon-lan"></i> <%= i18n.__('Championship') %></a>
+            </li>
+            <%}%>
+
+            <% if(session.group && session.group.permissions && (
+                session.group.permissions.indexOf(8) > -1 ||
+                session.group.permissions.indexOf(9) > -1 ||
+                session.group.permissions.indexOf(10) > -1 ||
+                session.group.permissions.indexOf(5) > -1 ||
+                session.group.permissions.indexOf(3) > -1)) { %>
+            <li class="navigation__sub <%= (tab_text === 'business_settings')?'navigation__sub--active':'' %>">
+                <a href="javascript:"><i class="zwicon-coin"></i> <%= i18n.__('Business Settings') %> <i class="zwicon-arrow-down"></i></a>
+                <ul>
+                    <% if(session.group.permissions.indexOf(10) > -1){%>
+                    <li class="<%= (sub_text == 'outcontrol_setting')?'navigation__active':'' %>">
+                        <a href="/user/outcontrol-setting"><i class="zwicon-price-tag"></i> <%= i18n.__('OutControl Setting') %></a>
+                    </li>
+                    <%}%>
+                    <% if(session.group.permissions.indexOf(9) > -1){%>
+                    <li class="<%= (sub_text == 'server_brokers')?'navigation__active':'' %>">
+                        <a href="/user/server-brokers"><i class="zwicon-price-tag"></i> <%= i18n.__('Server Brokers') %></a>
+                    </li>
+                    <%}%>
+                    <% if(session.group.permissions.indexOf(8) > -1){%>
+                    <li class="<%= (sub_text == 'plans')?'navigation__active':'' %>">
+                        <a href="/user/plans"><i class="zwicon-price-tag"></i> <%= i18n.__('Plans') %></a>
+                    </li>
+                    <%}%>
+                    <% if(session.group.permissions.indexOf(3) > -1){%>
+                    <li class="<%= (sub_text == 'ea_setting')?'navigation__active':'' %>">
+                        <a href="/user/ea-setting"><i class="zwicon-price-tag"></i> <%= i18n.__('EA Settings') %></a>
+                    </li>
+                    <%}%>
+                    <% if(session.group.permissions.indexOf(5) > -1){%>
+                    <li class="<%= (sub_text == 'champion_setting')?'navigation__active':'' %>">
+                        <a href="/user/champion-setting"><i class="zwicon-price-tag"></i> <%= i18n.__('Champion Settings') %></a>
+                    </li>
+                    <%}%>
+                </ul>
+            </li>
+            <%}%>
+
+            <% if(session.group && session.group.permissions && (
+                    session.group.permissions.indexOf(7) > -1 ||
+                    session.group.permissions.indexOf(13) > -1 ||
+                    session.group.permissions.indexOf(11) > -1 ||
+                    session.group.permissions.indexOf(12) > -1)) { %>
+            <li class="navigation__sub <%= (tab_text === 'system_management')?'navigation__sub--active':'' %>">
+                <a href="javascript:"><i class="zwicon-prototype"></i> <%= i18n.__('System Management') %> <i class="zwicon-arrow-down"></i></a>
+                <ul>
+                    <% if(session.group.permissions.indexOf(7) > -1){%>
+                    <li class="<%= (sub_text == 'statistic_trader')?'navigation__active':'' %>">
+                        <a href="/user/statistic-trader"><i class="zwicon-cog"></i> <%= i18n.__('Statistic Trader') %></a>
+                    </li>
+                    <%}%>
+                    <% if(session.group.permissions.indexOf(13) > -1){%>
+                    <li class="<%= (sub_text == 'finantial_area')?'navigation__active':'' %>">
+                        <a href="/user/financial-area"><i class="zwicon-cog"></i> <%= i18n.__('Financial Area') %></a>
+                    </li>
+                    <%}%>
+                    <% if(session.group.permissions.indexOf(11) > -1){%>
+                    <li class="<%= (sub_text == 'backup_system')?'navigation__active':'' %>">
+                        <a href="/user/backup-system"><i class="zwicon-cog"></i> <%= i18n.__('Backup System') %></a>
+                    </li>
+                    <%}%>
+                    <% if(session.group.permissions.indexOf(12) > -1){%>
+                    <li class="<%= (sub_text == 'logs_system')?'navigation__active':'' %>">
+                        <a href="/user/log-system"><i class="zwicon-cog"></i> <%= i18n.__('Logs System') %></a>
+                    </li>
+                    <%}%>
+                </ul>
+            </li>
+            <%}%>
+
+            <% if(session.group && session.group.permissions && (
+                session.group.permissions.indexOf(1) > -1 ||
+                session.group.permissions.indexOf(2) > -1)) { %>
+                <li class="navigation__sub <%= (tab_text === 'user_management')?'navigation__sub--active':'' %>">
+                    <a href="javascript:"><i class="zwicon-stand-up"></i> <%= i18n.__('User Management') %> <i class="zwicon-arrow-down"></i></a>
+                    <ul>
+                        <% if(session.group.permissions.indexOf(2) > -1) {%>
+                            <li class="<%= (sub_text == 'user_groups')?'navigation__active':'' %>">
+                                <a href="/user/groups"><i class="zwicon-interview"></i> <%= i18n.__('Groups') %></a>
+                            </li>
+                        <%}%>
+                        <% if(session.group.permissions.indexOf(1) > -1) {%>
+                            <li class="<%= (sub_text == 'user_users')?'navigation__active':'' %>">
+                                <a href="/user/users"><i class="zwicon-users"></i> <%= i18n.__('Users') %></a>
+                            </li>
+                        <%}%>
+                    </ul>
+                </li>
+            <% } %>
+
+            <% if(session.group && session.group.permissions && session.group.permissions.indexOf(14) > -1) { %>
+            <li class="<%= (tab_text === 'admin_messages')?'navigation__active':'' %>">
+                <a href="/user/admin-messages"><i class="zwicon-wrap-left"></i> <%= i18n.__('Admin Messages') %></a>
+            </li>
+            <%}%>
+
+            <li class="<%= (tab_text === 'settings')?'navigation__active':'' %>">
+                <a href="/user/account-settings"><i class="zwicon-cog"></i> <%= i18n.__('Account Settings') %></a>
+            </li>
+
+            <li>
+                <a href="/auth/logout"><i class="zwicon-arrow-circle-right"></i> <%= i18n.__('Logout') %></a>
+            </li>
+        </ul>
+    </div>
+</aside>

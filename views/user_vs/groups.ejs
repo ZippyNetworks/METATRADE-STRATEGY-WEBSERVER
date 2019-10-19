@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<% include ../partials/head.ejs %>
+<style>
+    #groups-table th, #groups-table td {
+        text-align: center;
+    }
+    .modal-header .close {
+        padding: 15px 15px 0;
+        margin: -1rem -1rem -1rem auto;
+        color: white;
+    }
+    .custom-checkbox {
+        padding-top: 2%;
+    }
+</style>
+<body data-sa-theme="5">
+<% include ../partials/header.ejs %>
+<% include ../partials/sidebar.ejs %>
+
+<section class="content">
+    <div class="content__inner">
+        <header class="content__title">
+            <h1><%= i18n.__('Groups') %></h1>
+            <div class="actions">
+                <a class="btn btn-outline-warning btn-lg" href="javascript:" data-toggle="modal" data-target="#modal-add-group"><%= i18n.__('Add new group') %></a>
+            </div>
+        </header>
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title"><%= i18n.__('DEFINE AN AVAILABLE GROUPS') %></h4>
+
+                <div class="table-responsive data-table">
+                    <table id="groups-table" class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <% for (let i = 0; i < permissions.length; i++) { %>
+                                <th><%= permissions[i].name %></th>
+                            <% } %>
+                            <th>EDITION</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <% for (let k = 0; k < groups.length; k++) { %>
+                            <tr>
+                                <td><%= groups[k].name %></td>
+                                <% for (let j = 0; j < permissions.length; j++) { %>
+                                    <td><i class="<%= (groups[k].permissions.indexOf(permissions[j].priority) > -1) ? 'zwicon-checkmark' : 'zwicon-close' %>"></i></td>
+                                <% } %>
+                                <td><a href="javascript:" onclick="openGroupModal('<%= k %>', '<%= groups[k].id %>')">Change</a></td>
+                            </tr>
+                        <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- add new group -->
+<div class="modal fade" id="modal-add-group" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Group</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input id="new_group_name" type="text" class="form-control" required>
+                <% for (let i = 0; i < permissions.length; i++) { %>
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input add-checkbox" id="add_<%= permissions[i].priority %>">
+                        <label class="custom-control-label" for="add_<%= permissions[i].priority %>"><%= permissions[i].name %></label>
+                    </div>
+                <% } %>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link" onclick="addNewGroup()">Add new group</button>
+                <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- change group options -->
+<div class="modal fade" id="modal-group" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Change permissions of Group</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="modal_group_id" value="">
+                <p>Group Name: <span id="modal_group_name"></span></p>
+                <% for (let i = 0; i < permissions.length; i++) { %>
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input edit-checkbox" id="edit_<%= permissions[i].priority %>">
+                        <label class="custom-control-label" for="edit_<%= permissions[i].priority %>"><%= permissions[i].name %></label>
+                    </div>
+                <% } %>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link" onclick="submitChangeGroup()">Save changes</button>
+                <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<% include ../partials/footer.ejs %>
+<% include ../partials/foot.ejs %>
+<script>
+    $(document).ready(function () {
+        $("#groups-table").DataTable({
+            aaSorting: [],
+            autoWidth: !1,
+            responsive: !0,
+            lengthMenu: [[15, 40, 100, -1], ["15 Rows", "40 Rows", "100 Rows", "Everything"]],
+            language: {searchPlaceholder: "Search for records..."},
+            sDom: '<"dataTables__top"flB<"dataTables_actions">>rt<"dataTables__bottom"ip><"clear">',
+            buttons: [{extend: "excelHtml5", title: "Export Data"}, {extend: "csvHtml5", title: "Export Data"}, {extend: "print", title: "Material Admin"}],
+            initComplete: function () {
+                let html = '<i class="zwicon-more-h" data-toggle="dropdown"></i>' +
+                    '<div class="dropdown-menu dropdown-menu-right">' +
+                    // '<a data-table-action="print" class="dropdown-item">Print</a>' +
+                    '<a data-table-action="fullscreen" class="dropdown-item">Fullscreen</a>' +
+                    // '<a data-table-action="excel" class="dropdown-item">Excel (.xlsx)</a>' +
+                    // '<a data-table-action="csv" class="dropdown-item">CSV (.csv)</a>' +
+                    '</div>';
+                $(".dataTables_actions").html(html)
+            }
+        });
+        $("body").on("click", "[data-table-action]", function (e) {
+            e.preventDefault();
+            var t = $(this).data("table-action");
+            if ("excel" === t && $("#groups-table_wrapper").find(".buttons-excel").click(), "csv" === t && $("#groups-table_wrapper").find(".buttons-csv").click(), "print" === t && $("#groups-table_wrapper").find(".buttons-print").click(), "fullscreen" === t) {
+                var a = $(this).closest(".card");
+                a.hasClass("card--fullscreen") ? (a.removeClass("card--fullscreen"), $('body').removeClass("data-table-toggled")) : (a.addClass("card--fullscreen"), $('body').addClass("data-table-toggled"))
+            }
+        });
+    });
+    let groups = JSON.parse(`<%- JSON.stringify(groups) %>`);
+    function openGroupModal(id, group_id) {
+        $('.edit-checkbox').each(function (i, item) {
+            $(item).prop('checked', false);
+        });
+        let group = groups[id];
+        if (!group) return;
+        $('#modal_group_id').val(group_id);
+        $('#modal_group_name').html(group.name);
+        let p_arr = group.permissions;
+        p_arr.forEach(function (priority) {
+            $('#edit_' + priority).prop('checked', true);
+        })
+        $('#modal-group').modal();
+    }
+    function submitChangeGroup() {
+        let priorities = [];
+        let checkboxes = $('input.edit-checkbox');
+        for (let i = 0; i < checkboxes.length; i++) {
+            if ($(checkboxes[i]).prop('checked')) priorities.push((i + 1));
+        }
+        let group_id = $('#modal_group_id').val();
+        let url = '/user/groups/edit';
+        let data = {
+            group_id: group_id,
+            permissions: priorities
+        };
+        $.ajax({
+            url: url,
+            method: 'post',
+            data: data,
+            success: function (res) {
+                if (res.status === 'success') {
+                    customAlert(res.message, true);
+                    setTimeout(function () {
+                        location.reload();
+                    }, 2000);
+                } else customAlert(res.message);
+            }
+        })
+    }
+    function addNewGroup() {
+        let group_name = $('#new_group_name').val();
+        if (group_name === '') {
+            $('#new_group_name').addClass('is-invalid');
+            setTimeout(function () {
+                $('#new_group_name').removeClass('is-invalid');
+            }, 3000);
+            return;
+        }
+        let priorities = [];
+        let checkboxes = $('input.add-checkbox');
+        for (let i = 0; i < checkboxes.length; i++) {
+            if ($(checkboxes[i]).prop('checked')) priorities.push((i + 1));
+        }
+        let url = '/user/groups/add';
+        let data = {
+            group_name: group_name,
+            permissions: priorities,
+        }
+        $.ajax({
+            url: url,
+            method: 'post',
+            data: data,
+            success: function (res) {
+                if (res.status === 'success') {
+                    customAlert(res.message, true);
+                    setTimeout(function () {
+                        location.reload();
+                    }, 2000);
+                } else customAlert(res.message);
+            }
+        })
+    }
+</script>
+</body>
+</html>

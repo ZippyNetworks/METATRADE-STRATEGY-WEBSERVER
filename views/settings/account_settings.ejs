@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<% include ../partials/head.ejs %>
+<link rel="stylesheet" href="/main/tel-input/css/intlTelInput.css">
+
+<body data-sa-theme="5">
+<% include ../partials/header.ejs %>
+<% include ../partials/sidebar.ejs %>
+<style>
+    #upload_profile_avatar {
+        display: none;
+    }
+
+    .iti {
+        display: block;
+    }
+
+    #factor2_qr_code {
+        width: 200px;
+        height: 200px;
+        display: inline-block;
+    }
+
+    #factor2_qr_code img {
+        border: 10px solid white;
+    }
+
+    .profile__info {
+        padding: 1px 30px;
+    }
+
+    #new_profile_phone {
+        padding-left: 81px;
+    }
+</style>
+<section class="content">
+    <div class="content__inner">
+        <header class="content__title">
+            <h1><%= i18n.__('Account Settings') %></h1>
+        </header>
+
+        <div class="card profile">
+            <div class="profile__img">
+                <img src="<%= user.avatar %>" alt="Profile Avatar" id="profile_avatar">
+                <input type="file" id="upload_profile_avatar" accept=".png, .jpg, .jpeg, .gif" onchange="previewProfileAvatar(event)">
+                <a href="javascript:" class="zwicon-camera profile__img__edit" onclick="$('#upload_profile_avatar').click()"></a>
+            </div>
+
+            <div class="profile__info">
+                <ul class="icon-list">
+                    <li><i class="zwicon-user-circle"></i> <%= user.first_name %></li>
+                    <li><i class="zwicon-mail"></i> <%= user.email %></li>
+                    <li><i class="zwicon-phone"></i> <%= user.phone %></li>
+                    <li>
+                        <select class="select2 form-control" id="language_group" data-minimum-results-for-search="-1">
+                            <option value="en" <%= (i18n.locale == 'EN') ? 'selected' : '' %> data-flag="us"> English</option>
+                            <option value="pl" <%= (i18n.locale == 'PL') ? 'selected' : '' %> data-flag="pl"> Polski</option>
+                        </select>
+                    </li>
+                    <li>
+                        <button class="btn btn-theme-dark" onclick="saveAvatar()"><%= i18n.__('SAVE') %></button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="tab-container">
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-toggle="tab" href="#profile" role="tab"><%= i18n.__('Profile') %></a>
+                        </li>
+                        <!--<li class="nav-item">-->
+                            <!--<a class="nav-link" data-toggle="tab" href="#business" role="tab"><%= i18n.__('Business') %></a>-->
+                        <!--</li>-->
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#notifications" role="tab"><%= i18n.__('Notifications') %></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#payments" role="tab"><%= i18n.__('Payment Methods') %></a>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+
+                        <div class="tab-pane active fade show" id="profile" role="tabpanel">
+                            <form class="row" id="profile_form">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label><%= i18n.__('User Name') %></label>
+                                        <input type="text" class="form-control" id="profile_first_name" value="<%= user.first_name %>">
+                                    </div>
+                                    <div class="form-group">
+                                        <label><%= i18n.__('Email Address') %></label>
+                                        <input type="email" class="form-control" id="profile_email" value="<%= user.email %>" disabled>
+                                    </div>
+                                    <div class="form-group" id="phone_group">
+                                        <label><%= i18n.__('Phone') %></label>
+                                        <div class="form-row">
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control" id="profile_phone" value="<%= user.phone %>" disabled>
+                                            </div>
+                                            <div class="col-sm-2" style="display: none">
+                                                <input type="text" class="form-control" id="old_phone_code" placeholder="<%= 'SMS' %>">
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <button type="button" class="btn btn-theme" id="send_old_phone_code_btn"
+                                                        onclick="sendOldPhone()"><%= i18n.__('Change') %></button>
+                                                <button type="button" class="btn btn-theme" id="confirm_old_phone_btn" onclick="confirmOldPhone()"
+                                                        style="display: none"><%= i18n.__('Verify') %></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group" id="new_phone_group" style="display: none;">
+                                        <label><%= i18n.__('Phone') %></label>
+                                        <div class="form-row">
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control" id="new_profile_phone">
+                                            </div>
+                                            <div class="col-sm-2" style="display: none">
+                                                <input type="text" class="form-control" id="new_phone_code" placeholder="<%= 'SMS' %>">
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <button type="button" class="btn btn-theme" id="send_new_phone_code_btn"
+                                                        onclick="sendNewPhone()"><%= i18n.__('Change') %></button>
+                                                <button type="button" class="btn btn-theme" id="confirm_new_phone_btn" onclick="confirmNewPhone()"
+                                                        style="display: none"><%= i18n.__('Verify') %></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label><%= i18n.__('Old Password') %></label>
+                                        <input type="password" id="profile_old_password" class="form-control">
+                                    </div>
+                                    <div class="form-group">
+                                        <label><%= i18n.__('New Password') %></label>
+                                        <input type="password" class="form-control" id="profile_new_password">
+                                    </div>
+                                    <div class="form-group">
+                                        <label><%= i18n.__('Confirm New Password') %></label>
+                                        <input type="password" class="form-control" id="profile_confirm_password">
+                                    </div>
+                                    <div class="form-group" style="text-align: center">
+                                        <button class="btn btn-outline-danger"><%= i18n.__('Edit Profile') %></button>
+                                        <button class="btn btn-outline-secondary" type="button" onclick="location.reload()"><%= i18n.__('Cancel') %></button>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <h3><%= i18n.__('Login security') %></h3>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="form-group">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text"><%= i18n.__('Google Authenticated Code') %></span>
+                                                </div>
+                                                <input type="text" class="form-control" id="factor2_token" placeholder="<%= i18n.__('Your 2FA code') %>">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-3"></div>
+                                                <div class="col-3">
+                                                    <span><%= i18n.__('Enable') %> / <%= i18n.__('Disable') %></span>
+                                                </div>
+                                                <div class="col-3">
+                                                    <div class="toggle-switch toggle-switch--green">
+                                                        <input type="checkbox" class="toggle-switch__checkbox" id="google_2factor_switch"
+                                                                <%= (session.user.factor2_flag == 1) ? 'checked' : '' %> >
+                                                        <i class="toggle-switch__helper"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="col-3"></div>
+                                            </div>
+
+                                        </div>
+                                        <% if (session.user.factor2_flag == 2) { %>
+                                            <div class="form-group">
+                                                <input type="text" class="form-control" id="factor2_qr_token" value="<%= session.user.factor2 %>" readonly/>
+                                            </div>
+                                            <div class="form-group text-center">
+                                                <div id="factor2_qr_code"></div>
+                                            </div>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="tab-pane fade" id="notifications" role="tabpanel">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <h6><%= i18n.__('Email notifications') %></h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered mb-0" id="email_notify_table">
+                                            <thead>
+                                            <tr>
+                                                <th><%= i18n.__('Type of notifications') %></th>
+                                                <th><%= i18n.__('Active') %></th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr>
+                                                <td><%= i18n.__('New order') %></td>
+                                                <td>
+                                                    <div class="toggle-switch toggle-switch--teal">
+                                                        <input type="checkbox" class="toggle-switch__checkbox" id="email_order_switch"
+                                                                <%= (notifications.email.order) ? 'checked' : '' %>>
+                                                        <i class="toggle-switch__helper"></i>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><%= i18n.__('New message') %></td>
+                                                <td>
+                                                    <div class="toggle-switch toggle-switch--teal">
+                                                        <input type="checkbox" class="toggle-switch__checkbox" id="email_message_switch"
+                                                                <%= (notifications.email.message) ? 'checked' : '' %>>
+                                                        <i class="toggle-switch__helper"></i>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><%= i18n.__('Summary of the day') %></td>
+                                                <td>
+                                                    <div class="toggle-switch toggle-switch--teal">
+                                                        <input type="checkbox" class="toggle-switch__checkbox" id="email_day_switch"
+                                                                <%= (notifications.email.day) ? 'checked' : '' %>>
+                                                        <i class="toggle-switch__helper"></i>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><%= i18n.__('Summary of the week') %></td>
+                                                <td>
+                                                    <div class="toggle-switch toggle-switch--teal">
+                                                        <input type="checkbox" class="toggle-switch__checkbox" id="email_week_switch"
+                                                                <%= (notifications.email.week) ? 'checked' : '' %>>
+                                                        <i class="toggle-switch__helper"></i>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><%= i18n.__('Summary of the month') %></td>
+                                                <td>
+                                                    <div class="toggle-switch toggle-switch--teal">
+                                                        <input type="checkbox" class="toggle-switch__checkbox" id="email_month_switch"
+                                                                <%= (notifications.email.month) ? 'checked' : '' %>>
+                                                        <i class="toggle-switch__helper"></i>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><%= i18n.__('Summary of the year') %></td>
+                                                <td>
+                                                    <div class="toggle-switch toggle-switch--teal">
+                                                        <input type="checkbox" class="toggle-switch__checkbox" id="email_year_switch"
+                                                                <%= (notifications.email.year) ? 'checked' : '' %>>
+                                                        <i class="toggle-switch__helper"></i>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6><%= i18n.__('SMS notifications') %></h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered" id="sms_notify_table">
+                                            <thead>
+                                            <tr>
+                                                <th><%= i18n.__('Type of notifications') %></th>
+                                                <th><%= i18n.__('Active') %></th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr>
+                                                <td><%= i18n.__('New earnings') %></td>
+                                                <td>
+                                                    <div class="toggle-switch toggle-switch--teal">
+                                                        <input type="checkbox" class="toggle-switch__checkbox" id="sms_earning_switch"
+                                                                <%= (notifications.sms.earnings) ? 'checked' : '' %>>
+                                                        <i class="toggle-switch__helper"></i>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><%= i18n.__("Info about the week's summary") %></td>
+                                                <td>
+                                                    <div class="toggle-switch toggle-switch--teal">
+                                                        <input type="checkbox" class="toggle-switch__checkbox" id="sms_week_switch"
+                                                                <%= (notifications.sms.week) ? 'checked' : '' %>>
+                                                        <i class="toggle-switch__helper"></i>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><%= i18n.__('Info about the summary month') %></td>
+                                                <td>
+                                                    <div class="toggle-switch toggle-switch--teal">
+                                                        <input type="checkbox" class="toggle-switch__checkbox" id="sms_month_switch"
+                                                                <%= (notifications.sms.month) ? 'checked' : '' %>>
+                                                        <i class="toggle-switch__helper"></i>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><%= i18n.__('Info about the summary of the year') %></td>
+                                                <td>
+                                                    <div class="toggle-switch toggle-switch--teal">
+                                                        <input type="checkbox" class="toggle-switch__checkbox" id="sms_year_switch"
+                                                                <%= (notifications.sms.year) ? 'checked' : '' %>>
+                                                        <i class="toggle-switch__helper"></i>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6><%= i18n.__(' Notifications in the browser') %></h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered mb-0" id="browser_notify_table">
+                                            <thead>
+                                            <tr>
+                                                <th><%= i18n.__('Type of notifications') %></th>
+                                                <th><%= i18n.__('Active') %></th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr>
+                                                <td><%= i18n.__('New order') %></td>
+                                                <td>
+                                                    <div class="toggle-switch toggle-switch--teal">
+                                                        <input type="checkbox" class="toggle-switch__checkbox" id="browser_order_switch"
+                                                                <%= (notifications.browser.order) ? 'checked' : '' %>>
+                                                        <i class="toggle-switch__helper"></i>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><%= i18n.__('New message') %></td>
+                                                <td>
+                                                    <div class="toggle-switch toggle-switch--teal">
+                                                        <input type="checkbox" class="toggle-switch__checkbox" id="browser_message_switch"
+                                                                <%= (notifications.browser.message) ? 'checked' : '' %>>
+                                                        <i class="toggle-switch__helper"></i>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="payments" role="tabpanel">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                        <div class="bank-payment">
+                                            <h5><%= i18n.__('Authorized Bank Account') %></h5>
+                                            <div class="table-responsive">
+                                                <table id="bank_payment_table" class="table">
+                                                    <tbody>
+                                                    <tr>
+                                                        <td style="width: 40%"><%= i18n.__('FROM WHOM') %></td>
+                                                        <td style="width: 60%"><%= i18n.__('ECAT') %></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style="width: 40%"><%= i18n.__('ACCOUNT NUMBER') %></td>
+                                                        <td style="width: 60%" id="bank_payment_td"><%= payments.BANK_address %></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style="width: 40%"><%= i18n.__('BY WAY') %></td>
+                                                        <td style="width: 60%"><%= i18n.__('Email') %></td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    <div class="bank-payment-buttons">
+                                        <h6><%= i18n.__('Add a new BANK addresses for withdrawals') %></h6>
+                                        <p><%= i18n.__("If you add new address, previous address will be removed, can't recover again") %></p>
+                                        <div class="form-group">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text"><%= i18n.__('BANK') %></span>
+                                                </div>
+                                                <input type="text" class="form-control input-mask" data-mask="0000 0000 0000 0000" id="add_bank_payment_input"
+                                                       placeholder="eg: 0000 0000 0000 0000" autocomplete="off" maxlength="19">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="form-row">
+                                                <div class="col-sm-8">
+                                                    <input type="email" class="form-control" id="bank_payment_confirm_email"
+                                                           placeholder="<%= i18n.__('Email address') %>">
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <input type="text" class="form-control" id="bank_payment_confirm_code"
+                                                           placeholder="<%= i18n.__('Confirm code') %>">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="add-bank-payment-buttons">
+                                            <button type="button" class="btn btn-theme" id="add_bank_payment_confirm_button"><%= i18n.__('Confirm email') %></button>
+                                            <button type="button" class="btn btn-theme" id="add_bank_payment_button"><%= i18n.__('ADD BANK ACCOUNT') %></button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="coin-payments">
+                                        <h5><%= i18n.__('Authorized BTC or ETH addresses') %></h5>
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered" id="coin_payments_table">
+                                                <thead>
+                                                <tr>
+                                                    <th style="width: 10%">No</th>
+                                                    <th style="width: 13%"><%= i18n.__('TYPE') %></th>
+                                                    <th style="width: 75%"><%= i18n.__('E-wallet Address') %></th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                <tr>
+                                                    <td>1</td>
+                                                    <td>BTC</td>
+                                                    <td id="btc_payment_address"><%= payments.BTC_address %></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>2</td>
+                                                    <td>ETH</td>
+                                                    <td id="eth_payment_address"><%= payments.ETH_address %></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>3</td>
+                                                    <td>GECA</td>
+                                                    <td id="geca_payment_address"><%= payments.GECA_address %></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>4</td>
+                                                    <td>CCC</td>
+                                                    <td id="ccc_payment_address"><%= payments.CCC_address %></td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="add-coin-payments">
+                                            <h6><%= i18n.__('Add a new BTC or ETH addresses for withdrawals') %></h6>
+                                            <p><%= i18n.__("If you add new address, previous address will be removed, can't recover again") %></p>
+                                            <div class="form-group">
+                                                <div class="form-row">
+                                                    <div class="col-sm-3">
+                                                        <select class="select form-control page-select" id="coin_payment_type">
+                                                            <option value="BTC">BTC</option>
+                                                            <option value="ETH">ETH</option>
+                                                            <option value="GECA">GECA</option>
+                                                            <option value="CCC">CCC</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-sm-9">
+                                                        <input type="text" class="form-control" id="add_coin_payment_input" placeholder="<%= i18n.__('wallet address') %>">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="form-row">
+                                                    <div class="col-sm-8">
+                                                        <input type="email" class="form-control" id="coin_payment_confirm_email"
+                                                               placeholder="<%= i18n.__('Email address') %>">
+                                                    </div>
+                                                    <div class="col-sm-4">
+                                                        <input type="text" class="form-control" id="coin_payment_confirm_code"
+                                                               placeholder="<%= i18n.__('Confirm code') %>">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="add-coin-payments-buttons">
+                                                <button type="button" class="btn btn-theme" id="add_coin_payment_confirm_button"><%= i18n.__('Confirm email') %></button>
+                                                <button type="button" class="btn btn-theme" id="add_coin_payment_button"><%= i18n.__('Add new address') %></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<% include ../partials/footer.ejs %>
+<% include ../partials/foot.ejs %>
+<script src="/main/tel-input/js/intlTelInput.js"></script>
+<script src="/main/js/jquery.qrcode.min.js"></script>
+<script>
+    let messages = [
+        '<%= i18n.__("First name is empty") %>',  // 0
+        '<%= i18n.__("Last name is empty") %>',  // 1
+        '<%= i18n.__("Old password is empty") %>',  // 2
+        '<%= i18n.__("New password is empty") %>',  // 3
+        '<%= i18n.__("Confirm password is empty") %>',  // 4
+        '<%= i18n.__("Confirm password does not match with password") %>',  // 5
+        '<%= i18n.__("2FA code is needed") %>',  // 6
+        '<%= i18n.__("Activated Your 2FA") %>',  // 7
+        '<%= i18n.__("Failed Activate 2FA") %>',  // 8
+        '<%= i18n.__("Avatar is not changed") %>',  // 9
+        '<%= i18n.__("Phone number format is not valid") %>',  // 10
+        '<%= i18n.__("Phone code is empty") %>',  // 11
+        '<%= i18n.__("Bank number is not valid") %>',  // 12
+        '<%= i18n.__("Confirm email is not valid") %>',  // 13
+        '<%= i18n.__("Wallet address is not valid") %>',  // 14
+    ];
+    let user = JSON.parse(`<%- JSON.stringify(user) %>`);
+    $(document).ready(function () {
+        let telInput = document.querySelector('#profile_phone');
+        let telInput1 = document.querySelector('#new_profile_phone');
+        window.intlTelInput(telInput, {
+            separateDialCode: true,
+            initialCountry: user.iso2
+        });
+        window.intlTelInput(telInput1, {
+            separateDialCode: true,
+            initialCountry: user.iso2
+        });
+        $('#history_business_agreement').dataTable({
+            aaSorting: [],
+            autoWidth: !1,
+            responsive: !0,
+            lengthMenu: [[15, 40, 100, -1], ["15 Rows", "40 Rows", "100 Rows", "Everything"]],
+            language: {searchPlaceholder: "Search for records..."},
+            sDom: '<"dataTables__top"flB<"dataTables_actions">>rt<"dataTables__bottom"ip><"clear">',
+        });
+        setTimeout(function () {
+            let qr_text = $('#factor2_qr_token').val();
+            if (qr_text) {
+                let qr_code = new QRCode("factor2_qr_code", {
+                    width: 200,
+                    height: 200,
+                });
+                qr_code.makeCode(qr_text);
+            }
+        }, 600)
+    });
+    $(function () {
+        let format = function (state) {
+            if (!state.id) return state.text; // optgroup
+            return "<i class='flag-icon flag-icon-" + $(state.element).attr('data-flag') + "'></i> " + state.text;
+        }
+        $(".select2").select2({
+            templateResult: format,
+            templateSelection: format,
+            escapeMarkup: function (m) {
+                return m;
+            }
+        });
+    });
+</script>
+<script src="/main/js/account_settings.js"></script>
+</body>
+</html>

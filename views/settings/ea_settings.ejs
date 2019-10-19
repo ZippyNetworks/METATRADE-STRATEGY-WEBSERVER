@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<% include ../partials/head.ejs %>
+<style>
+    .select2-container--open{
+        z-index: 9999;
+    }
+</style>
+<body data-sa-theme="5">
+<% include ../partials/header.ejs %>
+<% include ../partials/sidebar.ejs %>
+
+<section class="content">
+    <div class="content__inner">
+        <header class="content__title">
+            <h1><%= i18n.__('EA Settings') %></h1>
+        </header>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="py-3 text-right">
+                    <button type="button" class="btn btn-success" onclick="syncEASettingWithNj4x()">Sync OutControl Server</button>
+                </div>
+                <div class="table-responsive data-table">
+                    <table id="data-table" class="table table-bordered text-center" >
+                        <thead>
+                        <tr>
+                            <th style="color: yellow">User Name</th>
+                            <th style="color: yellow">Email</th>
+                            <th style="color: yellow">Account Number</th>
+                            <th style="color: yellow">Broker Name</th>
+                            <th style="color: yellow">Plan Name</th>
+                            <th style="color: yellow">Plan Approval Status</th>
+                            <th style="color: yellow">Validity Peroid</th>
+                            <th style="color: yellow">Create Date</th>
+                            <th style="color: yellow">Account Status</th>
+                            <th style="color: yellow">Aprove</th>
+                            <th style="color: yellow">Block</th>
+                            <th style="color: yellow">Edit</th>
+                            <th style="color: yellow">Remove</th>
+                            <th style="color: yellow">Performance</th>
+                            <th style="color: yellow">ViewLog</th>
+                        </tr>
+                        </thead>
+                        <tbody id="mt_accounts_list">
+                        <%for(let i = 0; i < mt_accounts.length; i++){%>
+                        <%if (mt_accounts[i].status == "Aproved"){%>
+                        <tr id="<%=mt_accounts[i].id%>" style="background: rgba(0,255,0,0.1);">
+                        <%} else if(mt_accounts[i].status == "Blocked") {%>
+                        <tr id="<%=mt_accounts[i].id%>" style="background: rgba(255,0,0,0.1);">
+                        <%} else {%>
+                        <tr id="<%=mt_accounts[i].id%>">
+                        <%}%>
+                            <td><%=users.find(x => x.id == mt_accounts[i].user_id).first_name%></td>
+                            <td><%=users.find(x => x.id == mt_accounts[i].user_id).email%></td>
+                            <td><%=mt_accounts[i].account_number%></td>
+                            <td><%=mt_accounts[i].broker.server_name%></td>
+                            <td><%=mt_accounts[i].plan.name%></td>
+                            <td style="color: greenyellow;"><%=mt_accounts[i].plan.approval_status%></td>
+                            <td><%=mt_accounts[i].plan.validity_period%></td>
+                            <td><%=mt_accounts[i].create_date%></td>
+                            <td style="color: #007bff"><%=mt_accounts[i].status%></td>
+                            <td><a href="#" style="color: greenyellow;" onclick="aproveAccount('<%=mt_accounts[i].id%>')">Aprove</a></td>
+                            <td><a href="#" style="color: red;" onclick="blockAccount('<%=mt_accounts[i].id%>')">Block</a></td>
+                            <td><a href="#" onclick="editAccount('<%=mt_accounts[i].id%>')">Edit</a></td>
+                            <td><a href="#" onclick="removeAccount('<%=mt_accounts[i].id%>')">Remove</a></td>
+                            <td><a href="/performance_mt_account?id=<%=mt_accounts[i].id%>" target="_blank"><%= i18n.__('Performance') %></a></td>
+                            <td><a href="/log_mt_account?id=<%=mt_accounts[i].id%>" target="_blank"><%= i18n.__('ViewLog') %></a></td>
+                        </tr>
+                        <%}%>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Edit MTAccount-->
+<div class="modal fade" id="modal-edit-account" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><%= i18n.__('Edit MetaTrader Account') %></h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <div class="pb-5">
+                        <div class="row" style="color: yellow;">
+                            <label class="col-sm-6 col-form-label">User Name:</label>
+                            <label class="col-sm-6 col-form-label" id="user_name"></label>
+                        </div>
+                        <div class="row" style="color: yellow;">
+                            <label class="col-sm-6 col-form-label">Email:</label>
+                            <label class="col-sm-6 col-form-label" id="email"></label>
+                        </div>
+                        <div class="row" style="color: yellow;">
+                            <label class="col-sm-6 col-form-label">Account Number:</label>
+                            <label class="col-sm-6 col-form-label" id="account_number"></label>
+                        </div>
+                        <div class="row" style="color: yellow;">
+                            <label class="col-sm-6 col-form-label">Account Password:</label>
+                            <label class="col-sm-6 col-form-label" id="account_password"></label>
+                        </div>
+                        <div class="row" style="color: yellow;">
+                            <label class="col-sm-6 col-form-label">Broker Name:</label>
+                            <label class="col-sm-6 col-form-label" id="broker_name"></label>
+                        </div>
+                        <div class="row" style="color: yellow;">
+                            <label class="col-sm-6 col-form-label">Broker IP:</label>
+                            <label class="col-sm-6 col-form-label" id="broker_ip"></label>
+                        </div>
+                        <div class="row" style="color: yellow;">
+                            <label class="col-sm-6 col-form-label">Platform:</label>
+                            <label class="col-sm-6 col-form-label" id="platform"></label>
+                        </div>
+                        <div class="row" style="color: yellow;">
+                            <label class="col-sm-6 col-form-label">Create Date:</label>
+                            <label class="col-sm-6 col-form-label" id="create_date"></label>
+                        </div>
+                    </div>
+
+
+                    <div class="row"  style="color: greenyellow;">
+                        <label class="col-sm-6 col-form-label">OutControl Server</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <select class="form-control" id="nj4x_server_id" style="background: black;" required />
+                                    <%for (let i = 0; i < nj4x_servers.length; i++) {%>
+                                    <option value="<%=nj4x_servers[i].id%>"><%=nj4x_servers[i].name%></option>
+                                    <%}%>
+                                </select>
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Plan Name</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <input type="text" class="form-control" id="plan_name" placeholder="Plan Name" required />
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Plan Price</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <input type="number" class="form-control" id="plan_price" placeholder="Plan Price" required />
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Min Lot</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <input type="number" class="form-control" id="min_lot" placeholder="Min Lot" required />
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Max Lot</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <input type="number" class="form-control" id="max_lot" placeholder="Max Lot" required />
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Max Daily Profit(USD)</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <input type="number" class="form-control" id="max_daily_profit" placeholder="Max Daily Profit" required />
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Max Daily Loss(USD)</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <input type="number" class="form-control" id="max_daily_loss" placeholder="Max Daily Loss" required />
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Daily Loss FIX</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <select class="form-control" id="daily_loss_fix" style="background: black;" required />
+                                    <option value="true">True</option>
+                                    <option value="false">False</option>
+                                </select>
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Max Total Profit(USD)</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <input type="number" class="form-control" id="max_total_profit" placeholder="Max Total Profit" required />
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Max Total Loss(USD)</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <input type="number" class="form-control" id="max_total_loss" placeholder="Max Total Loss" required />
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Total Loss FIX</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <select class="form-control" id="total_loss_fix" style="background: black;" required />
+                                    <option value="true">True</option>
+                                    <option value="false">False</option>
+                                </select>
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Max Orders / Lot</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <input type="number" class="form-control" id="max_orders" placeholder="Max Orders / Lot" required />
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Comment</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <input type="text" class="form-control" id="comment" placeholder="Comment">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Pairs</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <select class="form-control select2-selection--multiple pairs-multiple" id="pairs" multiple="multiple" style="background: black; width:100%;" required />
+                                    <% for (let i = 0; i < currency_pairs.length; i++) {%>
+                                        <option><%= currency_pairs[i].name%></option>
+                                    <% }%>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Use Pre-Approval</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <select class="form-control" id="use_pre_approval" style="background: black;" required />
+                                    <option value="true">True</option>
+                                    <option value="false">False</option>
+                                </select>
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">USD For Pre-Approval</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <input type="number" class="form-control" id="usd_for_pre_approval" placeholder="USD For Pre-Approval" required />
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Approval Plan</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <select class="form-control" id="approval_plan" style="background: black; width:100%;" required />
+                                    <% for (let i = 0; i < approval_plans.length; i++) {%>
+                                        <option value="<%= approval_plans[i].id%>"><%= approval_plans[i].name%></option>
+                                    <% }%>
+                                </select>
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Validity Period(days)</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <input type="number" class="form-control" id="validity_period" placeholder="Validity Period" required />
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Active Outside Control</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <select class="form-control" id="outside_control_flag" style="background: black;" required />
+                                    <option value="true">True</option>
+                                    <option value="false">False</option>
+                                </select>
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <input type="hidden" id="edit_account_id">
+                <button type="button" class="btn btn-theme" onclick="submitEditAccount()"><%= i18n.__('Edit Plan') %></button>
+                <button type="button" class="btn btn-theme" data-dismiss="modal"><%= i18n.__('Cancel') %></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<% include ../partials/footer.ejs %>
+<% include ../partials/foot.ejs %>
+<script>
+    $(document).ready(function () {
+        $(".pairs-multiple").select2();
+    });
+
+    let users = JSON.parse(`<%- JSON.stringify(users) %>`);
+    let currency_pairs = JSON.parse(`<%- JSON.stringify(currency_pairs) %>`);
+    let nj4x_servers = JSON.parse(`<%- JSON.stringify(nj4x_servers) %>`);
+    let approval_plans = JSON.parse(`<%- JSON.stringify(approval_plans) %>`);
+    let mt_accounts = JSON.parse(`<%- JSON.stringify(mt_accounts) %>`);
+
+    function editAccount(id){
+        $('#modal-edit-account').find('input, select').each(function () {
+            if ($(this).prop('required')){
+                $(this).removeClass('is-invalid');
+            }
+        });
+
+        let cur_mt_account = mt_accounts.find(x => x.id == id);
+        $('#edit_account_id').val(id);
+        $('#user_name').html(users.find(x => x.id == cur_mt_account.user_id).first_name);
+        $('#email').html(users.find(x => x.id == cur_mt_account.user_id).email);
+        $('#account_number').html(cur_mt_account.account_number);
+        $('#account_password').html(cur_mt_account.account_password);
+        if (cur_mt_account.broker)
+        {
+            $('#broker_name').html(cur_mt_account.broker.server_name);
+            $('#broker_ip').html(cur_mt_account.broker.server_ip);
+        }
+        $('#platform').html(cur_mt_account.platform);
+        $('#create_date').html(cur_mt_account.create_date);
+
+        //Editable Attribute
+        $('#nj4x_server_id').val(cur_mt_account.server_id);
+        if (cur_mt_account.plan)
+        {
+            $('#plan_name').val(cur_mt_account.plan.name);
+            $('#plan_price').val(cur_mt_account.plan.price);
+            $('#min_lot').val(cur_mt_account.plan.min_lot);
+            $('#max_lot').val(cur_mt_account.plan.max_lot);
+            $('#max_daily_profit').val(cur_mt_account.plan.max_daily_profit);
+            $('#max_daily_loss').val(cur_mt_account.plan.max_daily_loss);
+            $('#daily_loss_fix').val(cur_mt_account.plan.daily_loss_fix.toString());
+            $('#max_total_profit').val(cur_mt_account.plan.max_total_profit);
+            $('#max_total_loss').val(cur_mt_account.plan.max_total_loss);
+            $('#total_loss_fix').val(cur_mt_account.plan.total_loss_fix.toString());
+            $('#max_orders').val(cur_mt_account.plan.max_orders);
+            $('#comment').val(cur_mt_account.plan.comment);
+            //$('#pairs').val(cur_mt_account.plan.currency_pair);
+            $('#use_pre_approval').val(cur_mt_account.plan.use_pre_approval.toString());
+            $('#usd_for_pre_approval').val(cur_mt_account.plan.usd_for_pre_approval);
+            $('#approval_plan').val(cur_mt_account.plan.approval_plan_id);
+            $('#validity_period').val(cur_mt_account.plan.validity_period);
+            $('#outside_control_flag').val(cur_mt_account.plan.outside_control_flag.toString());
+
+            let str_pair = "[" + cur_mt_account.plan.currency_pair + "]";
+            $('#pairs').val(str_pair.slice(1, -1).split(',')).select2();
+        }
+
+        $('#modal-edit-account').modal();
+    }
+    function submitEditAccount(){
+        let bValid = true;
+        $('#modal-edit-account').find('input, select').each(function () {
+            if ($(this).prop('required') && ($(this).val()==null || $(this).val()=="")){
+                $(this).addClass('is-invalid');
+                bValid = false;
+            } else {
+                $(this).removeClass('is-invalid');
+            }
+        });
+        if (!bValid) return;
+
+        let account_id           = $('#edit_account_id').val();
+        let nj4x_server_id       = $('#nj4x_server_id').val();
+        let plan_name            = $('#plan_name').val();
+        let plan_price           = $('#plan_price').val();
+        let min_lot              = $('#min_lot').val();
+        let max_lot              = $('#max_lot').val();
+        let max_daily_profit     = $('#max_daily_profit').val();
+        let max_daily_loss       = $('#max_daily_loss').val();
+        let daily_loss_fix       = $('#daily_loss_fix').val();
+        let max_total_profit     = $('#max_total_profit').val();
+        let max_total_loss       = $('#max_total_loss').val();
+        let total_loss_fix       = $('#total_loss_fix').val();
+        let max_orders           = $('#max_orders').val();
+        let comment              = $('#comment').val();
+        let pairs                = $('#pairs').val();
+        let use_pre_approval     = $('#use_pre_approval').val();
+        let usd_for_pre_approval = $('#usd_for_pre_approval').val();
+        let approval_plan        = $('#approval_plan').val();
+        let validity_period      = $('#validity_period').val();
+        let outside_control_flag = $('#outside_control_flag').val();
+
+        let url = '/user/editMTAccount';
+        let data = {
+            account_id: account_id          ,
+            nj4x_server_id: nj4x_server_id      ,
+            plan_name: plan_name           ,
+            plan_price: plan_price          ,
+            min_lot: min_lot             ,
+            max_lot: max_lot             ,
+            max_daily_profit: max_daily_profit    ,
+            max_daily_loss: max_daily_loss      ,
+            daily_loss_fix: daily_loss_fix      ,
+            max_total_profit: max_total_profit    ,
+            max_total_loss: max_total_loss      ,
+            total_loss_fix: total_loss_fix      ,
+            max_orders: max_orders          ,
+            comment: comment             ,
+            pairs: pairs               ,
+            use_pre_approval: use_pre_approval    ,
+            usd_for_pre_approval: usd_for_pre_approval,
+            approval_plan: approval_plan       ,
+            validity_period: validity_period     ,
+            outside_control_flag: outside_control_flag,
+
+            type: 'Edit',
+        };
+        $.ajax({
+            url: url,
+            method: 'post',
+            data: data,
+            success: function (res) {
+                if (res.status === 'success') {
+                    customAlert(res.message, true);
+                    setTimeout(function () {
+                        location.reload();
+                    }, 500);
+                } else customAlert(res.message);
+            }
+        })
+    }
+    function aproveAccount(id){
+        let url = '/user/editMTAccount';
+        let data = {
+            account_id: id,
+            type: 'Aprove',
+        };
+        $.ajax({
+            url: url,
+            method: 'post',
+            data: data,
+            success: function (res) {
+                if (res.status === 'success') {
+                    customAlert(res.message, true);
+                    setTimeout(function () {
+                        location.reload();
+                    }, 500);
+                } else customAlert(res.message);
+            }
+        })
+    }
+    function blockAccount(id){
+        let url = '/user/editMTAccount';
+        let data = {
+            account_id: id,
+            type: 'Block',
+        };
+        $.ajax({
+            url: url,
+            method: 'post',
+            data: data,
+            success: function (res) {
+                if (res.status === 'success') {
+                    customAlert(res.message, true);
+                    setTimeout(function () {
+                        location.reload();
+                    }, 500);
+                } else customAlert(res.message);
+            }
+        })
+    }
+    function removeAccount(id){
+        let url = '/user/editMTAccount';
+        let data = {
+            account_id: id,
+            type: 'Remove',
+        };
+        $.ajax({
+            url: url,
+            method: 'post',
+            data: data,
+            success: function (res) {
+                if (res.status === 'success') {
+                    customAlert(res.message, true);
+                    setTimeout(function () {
+                        location.reload();
+                    }, 500);
+                } else customAlert(res.message);
+            }
+        })
+    }
+
+    function syncEASettingWithNj4x(){
+        let url = '/user/syncEASettingWithNj4x';
+        let data = {
+        };
+        $.ajax({
+            url: url,
+            method: 'post',
+            data: data,
+            success: function (res) {
+                if (res.status === 'success') {
+                    customAlert(res.message, true);
+                    setTimeout(function () {
+                        location.reload();
+                    }, 500);
+                } else customAlert(res.message);
+            }
+        })
+    }
+</script>
+</body>
+</html>

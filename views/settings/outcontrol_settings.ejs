@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<% include ../partials/head.ejs %>
+
+<body data-sa-theme="5">
+<% include ../partials/header.ejs %>
+<% include ../partials/sidebar.ejs %>
+
+<section class="content">
+    <div class="content__inner">
+        <header class="content__title">
+            <h1><%= i18n.__('Outcontrol Settings') %></h1>
+        </header>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="tab-container">
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-toggle="tab" href="#status" role="tab"><%= i18n.__('Status of Servers') %></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#logs" role="tab"><%= i18n.__('Logs of Servers') %></a>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+                        <div class="tab-pane active fade show" id="status" role="tabpanel">
+                            <div class="py-3 text-right">
+                                <button type="button" class="btn btn-success" onclick="addNewNJ4XServer()">Register New Server</button>
+                                <button type="button" class="btn btn-success ml-3" onclick="syncServerSettingWithNj4x()">Sync OutControl Server</button>
+                            </div>
+                            <div class="table-responsive data-table">
+                                <table id="data-table" class="table table-bordered text-center">
+                                    <thead>
+                                    <tr>
+                                        <th style="color: yellow">Server Name</th>
+                                        <th style="color: yellow">Server Name</th>
+                                        <th style="color: yellow">Server Port</th>
+                                        <th style="color: yellow">Max Terminals</th>
+                                        <th style="color: yellow">Sync Time(Minutes)</th>
+                                        <th style="color: yellow">Status</th>
+                                        <th style="color: yellow">Remove</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="server_list">
+                                    <% for (let i = 0; i < nj4x_servers.length; i++) {%>
+                                    <tr id="<%= nj4x_servers[i].id%>">
+                                        <td><%= nj4x_servers[i].name%></td>
+                                        <td><%= nj4x_servers[i].server_ip%></td>
+                                        <td><%= nj4x_servers[i].server_port%></td>
+                                        <td><%= nj4x_servers[i].max_terminals%></td>
+                                        <td><%= nj4x_servers[i].time_sync%></td>
+                                        <td style="color: greenyellow;"><%= nj4x_servers[i].status%></td>
+                                        <td><a href="#" onclick="removeNJ4XServer('<%= nj4x_servers[i].id%>')">Remove</a></td>
+                                    </tr>
+                                    <%}%>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="logs" role="tabpanel">
+                            <table id="" class="table table-bordered">
+                                <thead>
+                                <tr>
+                                    <th style="color: yellow">Date/Time</th>
+                                    <th style="color: yellow">Server Name</th>
+                                    <th style="color: yellow">Event Content</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <% for (let i = 0; i < nj4x_logs.length; i++){%>
+                                    <tr>
+                                        <td><%= nj4x_logs[i].log_date.toLocaleString()%></td>
+                                        <% if (nj4x_servers.find(x => x.id == nj4x_logs[i].nj4x_id)) {%>
+                                            <td><%= nj4x_servers.find(x => x.id == nj4x_logs[i].nj4x_id).name%></td>
+                                        <%} else {%>
+                                            <td> *** </td>
+                                        <%}%>
+                                        <td><%= nj4x_logs[i].log_content%></td>
+                                    </tr>
+                                <%}%>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Add New Plan -->
+<div class="modal fade" id="modal-new-server" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">New OutControl Server</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Server Name</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <input type="text" class="form-control" id="nj4x_server_name" placeholder="Server Name" required />
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Server IP</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <input type="text" class="form-control" id="nj4x_server_ip" placeholder="Server IP" required />
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Server Port</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <input type="number" class="form-control" id="nj4x_server_port" placeholder="Server Port" required />
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Max Terminals Permited</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <input type="number" class="form-control" id="max_terminals" placeholder="Max Terminals Permited" required />
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <label class="col-sm-6 col-form-label">Time Sync(minute)</label>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <input type="number" class="form-control" id="time_sync" placeholder="Time Sync" required />
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-theme" onclick="submitAddNJ4XServer()"><%= i18n.__('Add Server') %></button>
+                <button type="button" class="btn btn-theme" data-dismiss="modal"><%= i18n.__('Cancel') %></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- remove modal -->
+<div class="modal fade" id="modal_delete_message" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header"></div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <i class="zwicon-info-circle" style="font-size: 7rem"></i>
+                </div>
+                <div class="form-group">
+                    <h3><%= i18n.__('Are you sure to remove?') %></h3>
+                </div>
+                <input type="hidden" id="modal_delete_type">
+                <input type="hidden" id="modal_delete_id">
+                <button type="button" class="btn btn-link" onclick="onDeleteBtn()"><%= i18n.__('Remove')%></button>
+                <button type="button" class="btn btn-link" data-dismiss="modal"><%= i18n.__('Cancel') %></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<% include ../partials/footer.ejs %>
+<% include ../partials/foot.ejs %>
+<script>
+    function addNewNJ4XServer(){
+        $('#modal-new-server').find('input').each(function () {
+            if ($(this).prop('required')){
+                $(this).removeClass('is-invalid');
+            }
+        });
+        $('#modal-new-server').modal();
+    }
+    function removeNJ4XServer(id) {
+        $('#modal_delete_id').val(id);
+        $('#modal_delete_message').modal();
+    }
+    function submitAddNJ4XServer() {
+        let bValid = true;
+        $('#modal-new-server').find('input').each(function () {
+            if ($(this).prop('required') && ($(this).val()==null || $(this).val()=="")){
+                $(this).addClass('is-invalid');
+                bValid = false;
+            } else {
+                $(this).removeClass('is-invalid');
+            }
+        });
+        if (!bValid) return;
+
+        let nj4x_server_name = $('#nj4x_server_name').val();
+        let nj4x_server_ip = $('#nj4x_server_ip').val();
+        let nj4x_server_port = $('#nj4x_server_port').val();
+        let max_terminals = $('#max_terminals').val();
+        let time_sync = $('#time_sync').val();
+
+        let url = '/user/editNJ4XServer';
+        let data = {
+            nj4x_server_name: nj4x_server_name,
+            nj4x_server_ip: nj4x_server_ip,
+            nj4x_server_port: nj4x_server_port,
+            max_terminals: max_terminals,
+            time_sync: time_sync,
+
+            type: 'add',
+        };
+
+        $.ajax({
+            url: url,
+            method: 'post',
+            data: data,
+            success: function (res) {
+                if (res.status === 'success') {
+                    let new_server = res.new_server;
+                    customAlert(res.message, true);
+                    $('#server_list .odd[role!="row"]').remove();
+                    $('#server_list').append(
+                        '<tr id="'+ new_server.id +'">\n' +
+                        '<td>'+ new_server.name +'</td>\n' +
+                        '<td>'+ new_server.server_ip +'</td>\n' +
+                        '<td>'+ new_server.server_port +'</td>\n' +
+                        '<td>'+ new_server.max_terminals +'</td>\n' +
+                        '<td>'+ new_server.time_sync +'</td>\n' +
+                        '<td style="color: greenyellow;">'+ new_server.status +'</td>\n' +
+                        '<td><a href="#" onclick="removeNJ4XServer(\''+ new_server.id +'\')">Remove</a> </td>\n' +
+                        '</tr>');
+                    $('#modal-new-server').modal("hide");
+                } else customAlert(res.message);
+            }
+        })
+    }
+    function onDeleteBtn() {
+        let server_id = $('#modal_delete_id').val();
+        let url = '/user/editNJ4XServer';
+        let data = {
+            server_id: server_id,
+            type: 'delete',
+        };
+        $.ajax({
+            url: url,
+            method: 'post',
+            data: data,
+            success: function (res) {
+                if (res.status === 'success') {
+                    customAlert(res.message, true);
+                    $('#' + server_id).remove();
+                    $('#modal_delete_message').modal("hide");
+                } else customAlert(res.message);
+            }
+        })
+    }
+
+    function syncServerSettingWithNj4x(){
+        let url = '/user/syncServerSettingWithNj4x';
+        let data = {
+        };
+        $.ajax({
+            url: url,
+            method: 'post',
+            data: data,
+            success: function (res) {
+                if (res.status === 'success') {
+                    customAlert(res.message, true);
+                    setTimeout(function () {
+                        location.reload();
+                    }, 500);
+                } else customAlert(res.message);
+            }
+        })
+    }
+</script>
+</body>
+</html>

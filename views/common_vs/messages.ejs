@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<% include ../partials/head.ejs %>
+
+<body data-sa-theme="5">
+<% include ../partials/header.ejs %>
+<% include ../partials/sidebar.ejs %>
+
+<section class="content">
+    <div class="content__inner">
+        <header class="content__title">
+            <h1><%= i18n.__('Messages') %></h1>
+        </header>
+        <div class="row">
+            <div class="col-md-3"></div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="form-group">
+                            <h5 style="text-align: center"><%= i18n.__('SEND AN INQUIRY OR INQUIRY') %></h5>
+                        </div>
+                        <div class="form-group">
+                            <select class="form-control page-select" id="message_section">
+                                <option value="none"><%= i18n.__('CHOOSE A SECTION') %></option>
+                                <option value="e-commerce"><%= i18n.__('CUSTOMER SERVICE IN SHOPS') %> (e-commerce@ec-at.com)</option>
+                                <option value="magazyn"><%= i18n.__('INFORMATION ABOUT TRADE BASIS') %> (magazyn@ec-at.com)</option>
+                                <option value="sale"><%= i18n.__('SALES SHOP OFFER') %> (sale@ec-at.com)</option>
+                                <option value="sales"><%= i18n.__('DEPARTMENT OF CURRENT SERVICES') %> (sales@ec-at.com)</option>
+                                <option value="help"><%= i18n.__('TECHNICAL DEPARTMENT') %> (help@ec-at.com)</option>
+                                <option value="wspolpraca"><%= i18n.__('THE WHOLESALE OFFER AND TALKS WITH PRODUCERS') %> (wspolpraca@ec-at.com)</option>
+                                <option value="ksiegowosc"><%= i18n.__('ACCOUNTING AND ACCOUNTING DEPARTMENT') %> (ksiegowosc@ec-at.com)</option>
+                                <option value="sugestie"><%= i18n.__('DEPARTMENT AND DEVELOPMENT DEPARTMENT') %> (sugestie@ec-at.com)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <input class="form-control" id="message_subject" type="text" placeholder="<%= i18n.__('ENTER THE SUBJECT') %>">
+                        </div>
+                        <div class="form-group">
+                            <textarea class="form-control" id="message_content" type="text" placeholder="<%= i18n.__('MESSAGE CONTENT') %>"></textarea>
+                        </div>
+                        <div class="text-center">
+                            <button class="btn btn-theme-dark" id="message_send_button"><%= i18n.__('SEND') %></button>
+                            <button class="btn btn-theme" onclick="location.reload()"><%= i18n.__('CANCEL') %></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3"></div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <h5><%= i18n.__('HISTORY OF CONTACT') %></h5>
+                <div class="table-responsive data-table">
+                    <table id="messages-table" class="table table-bordered" style="text-align: center;">
+                        <thead>
+                        <tr>
+                            <th><%= i18n.__('NO') %></th>
+                            <th><%= i18n.__('DATE OF START') %></th>
+                            <th><%= i18n.__('SECTION') %></th>
+                            <th><%= i18n.__('TOPIC') %></th>
+                            <th><%= i18n.__('CONTENT') %></th>
+                            <th><%= i18n.__('STATUS') %></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <% for (let i = 0; i < messages.length; i++) { %>
+                            <tr id="<%= messages[i].id %>">
+                                <td><%= i + 1 %></td>
+                                <td><%= messages[i].created_at.toLocaleString() %></td>
+                                <td><%= messages[i].section %></td>
+                                <td><%= messages[i].subject %></td>
+                                <td><%= messages[i].content %></td>
+                                <td>
+                                    <%= (messages[i].status == 1)?'Unread':(messages[i].status == 2)?'Read':'Replied' %>
+                                    <% if (messages[i].status == 2 && messages[i].message_to == session.user.email) { %>
+                                        <button class="btn btn-warning btn-sm" onclick="replyMessage('<%= messages[i].id%>')"><%= i18n.__('Reply') %></button>
+                                    <% } %>
+                                </td>
+                            </tr>
+                        <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Reply message modal -->
+<div class="modal fade" id="modal_reply_message" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><%= i18n.__('Reply a message') %></h3>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <input type="hidden" id="modal_reply_message_section">
+                    <input type="text" class="form-control" id="modal_reply_message_to" readonly>
+                </div>
+                <div class="form-group">
+                    <input type="hidden" id="modal_reply_message_store_id">
+                    <input type="text" class="form-control" id="modal_reply_message_store_domain" readonly>
+                </div>
+                <div class="form-group">
+                    <input type="email" class="form-control" id="modal_reply_message_store_engine" readonly>
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-control" id="modal_reply_subject" placeholder="<%= i18n.__('Subject') %>">
+                </div>
+                <div class="form-group">
+                    <textarea class="form-control" id="modal_reply_content" placeholder="<%= i18n.__('Content') %>"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-warning" id="modal_reply_message_button"><%= i18n.__('Reply') %></button>
+                <button class="btn btn-theme" data-dismiss="modal"><%= i18n.__('Cancel') %></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<% include ../partials/footer.ejs %>
+<% include ../partials/foot.ejs %>
+<script>
+    $(document).ready(function () {
+        $("#messages-table").DataTable({
+            aaSorting: [],
+            autoWidth: !1,
+            responsive: !0,
+            lengthMenu: [[15, 40, 100, -1], ["15 Rows", "40 Rows", "100 Rows", "Everything"]],
+            language: {searchPlaceholder: "Search for records..."},
+            sDom: '<"dataTables__top"flB<"dataTables_actions">>rt<"dataTables__bottom"ip><"clear">',
+            buttons: [{extend: "excelHtml5", title: "Export Data"}, {extend: "csvHtml5", title: "Export Data"}, {extend: "print", title: "Material Admin"}],
+            initComplete: function () {
+                let html = '<i class="zwicon-more-h" data-toggle="dropdown"></i>' +
+                    '<div class="dropdown-menu dropdown-menu-right">' +
+                    '<a data-table-action="print" class="dropdown-item">Print</a>' +
+                    '<a data-table-action="fullscreen" class="dropdown-item">Fullscreen</a>' +
+                    '<a data-table-action="excel" class="dropdown-item">Excel (.xlsx)</a>' +
+                    '<a data-table-action="csv" class="dropdown-item">CSV (.csv)</a>' +
+                    '</div>';
+                $(".dataTables_actions").html(html)
+            }
+        });
+        $("body").on("click", "[data-table-action]", function (e) {
+            e.preventDefault();
+            let t = $(this).data("table-action");
+            if ("excel" === t && $("#messages-table_wrapper").find(".buttons-excel").click(), "csv" === t && $("#messages-table_wrapper").find(".buttons-csv").click(), "print" === t && $("#messages-table_wrapper").find(".buttons-print").click(), "fullscreen" === t) {
+                let a = $(this).closest(".card");
+                a.hasClass("card--fullscreen") ? (a.removeClass("card--fullscreen"), $('body').removeClass("data-table-toggled")) : (a.addClass("card--fullscreen"), $('body').addClass("data-table-toggled"))
+            }
+        });
+    });
+    let messages = [
+        '<%= i18n.__("CHOOSE A SECTION") %>',  // 0
+        '<%= i18n.__("CHOOSE YOUR STORE") %>',  // 1
+        '<%= i18n.__("Enter a subject of message") %>',  // 2
+        '<%= i18n.__("Enter a content of message") %>',  // 3
+        '<%= i18n.__("Reply message is not valid") %>',  // 4
+    ];
+    $('#message_send_button').on('click', function () {
+        let section = $('#message_section').val();
+        let store = $('#message_store').val();
+        let subject = $('#message_subject').val();
+        let content = $('#message_content').val();
+        if (section === 'none') {
+            customAlert(messages[0]);
+            return;
+        }
+        if (subject === '') {
+            customAlert(messages[2]);
+            return;
+        }
+        if (content === '') {
+            customAlert(messages[3]);
+            return;
+        }
+        let message_data = {
+            message_section: section,
+            message_store: '',
+            message_subject: subject,
+            message_content: content,
+            message_to: section + '@ec-at.com'
+        };
+        $.ajax({
+            url: '/post-customer-messages',
+            method: 'post',
+            data: message_data,
+            success: function (res) {
+                if (res.status === 'success') {
+                    customAlert(res.message, true);
+                    message_socket_connection.send(JSON.stringify({
+                        message_section: message_data.message_section,
+                        message_store: message_data.message_store,
+                        message_subject: message_data.message_subject,
+                        message_content: message_data.message_content,
+                        message_from: res.data.message_from,
+                        message_to: res.data.message_to
+                    }));
+                    setTimeout(function () {
+                        location.reload()
+                    }, 1500);
+                } else customAlert(res.message);
+            }
+        })
+    });
+    function replyMessage(id) {
+        $.ajax({
+            url: '/get-message-item',
+            method: 'post',
+            data: {
+                message_id: id
+            },
+            success: function (res) {
+                if (res.status === 'success') {
+                    $('#modal_reply_message_section').val(res.mData.section)
+                    $('#modal_reply_message_to').val(res.mData.message_from);
+                    $('#modal_reply_message_store_id').val(res.sID);
+                    $('#modal_reply_message_store_domain').val(res.sDomain);
+                    let store_engine = (res.sEngine == 1)?'WooCommerce':(res.sEngine == 2)?'Prestashop':'ECAT';
+                    $('#modal_reply_message_store_engine').val(store_engine);
+                    $('#modal_reply_message').modal();
+                } else customAlert(res.message);
+            }
+        });
+    }
+    $('#modal_reply_message_button').on('click', function () {
+        let message_section = $('#modal_reply_message_section').val();
+        let message_to = $('#modal_reply_message_to').val();
+        let store_id = $('#modal_reply_message_store_id').val();
+        let subject = $('#modal_reply_subject').val();
+        let content = $('#modal_reply_content').val();
+        if (message_section === '' || message_to === '' || store_id === '') {
+            customAlert(messages[4]);
+            return;
+        }
+        if (subject === '') {
+            customAlert(messages[2]);
+            return;
+        }
+        if (content === '') {
+            customAlert(messages[3]);
+            return;
+        }
+        let message_data = {
+            message_section: message_section,
+            message_store: store_id,
+            message_subject: subject,
+            message_content: content,
+            message_to: message_to,
+        }
+        $.ajax({
+            url: '/post-customer-messages',
+            method: 'post',
+            data: message_data,
+            success: function (res) {
+                if (res.status === 'success') {
+                    customAlert(res.message, true);
+                    message_socket_connection.send(JSON.stringify({
+                        message_section: message_data.message_section,
+                        message_store: message_data.message_store,
+                        message_subject: message_data.message_subject,
+                        message_content: message_data.message_content,
+                        message_from: res.data.message_from,
+                        message_to: res.data.message_to
+                    }));
+                    setTimeout(function () {
+                        location.reload()
+                    }, 1500);
+                } else customAlert(res.message);
+            }
+        })
+    });
+</script>
+</body>
+</html>

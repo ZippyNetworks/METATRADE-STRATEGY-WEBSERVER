@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<% include ../partials/head.ejs %>
+
+<body data-sa-theme="5">
+<% include ../partials/header.ejs %>
+<% include ../partials/sidebar.ejs %>
+
+<section class="content">
+    <div class="content__inner">
+        <header class="content__title">
+            <h1><%= i18n.__('Championship Settings') %></h1>
+        </header>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="tab-container">
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-toggle="tab" href="#new" role="tab"><%= i18n.__('New Championship') %></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#active" role="tab"><%= i18n.__('Active Championship') %></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#fininshed" role="tab"><%= i18n.__('Finished Championship') %></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#search" role="tab"><%= i18n.__('Search Account Number') %></a>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+
+                        <div class="tab-pane  active fade show text-center" id="new" role="tabpanel">
+                            <div class="w-50 text-left" style="display: inline-block;">
+                                <form>
+                                    <div class="row">
+                                        <label class="col-sm-4 col-form-label">Championship Name</label>
+                                        <div class="col-sm-8">
+                                            <div class="form-group">
+                                                <input type="text" class="form-control" placeholder="Championship Name">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <label class="col-sm-4 col-form-label">Min Accounts Participate</label>
+                                        <div class="col-sm-8">
+                                            <div class="form-group">
+                                                <input type="number" class="form-control" placeholder="Min Accounts Participate">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <label class="col-sm-4 col-form-label">Max Accounts Participate</label>
+                                        <div class="col-sm-8">
+                                            <div class="form-group">
+                                                <input type="number" class="form-control" placeholder="Max Accounts Participate">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <label class="col-sm-4 col-form-label">Min Lot</label>
+                                        <div class="col-sm-8">
+                                            <div class="form-group">
+                                                <input type="number" class="form-control" placeholder="Min Lot">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <label class="col-sm-4 col-form-label">Max Lot</label>
+                                        <div class="col-sm-8">
+                                            <div class="form-group">
+                                                <input type="number" class="form-control" placeholder="Max Lot">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <label class="col-sm-4 col-form-label">Max Loss Daily</label>
+                                        <div class="col-sm-8">
+                                            <div class="form-group">
+                                                <input type="number" class="form-control" placeholder="Max Loss Daily">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <label class="col-sm-4 col-form-label">Max Profit Daily</label>
+                                        <div class="col-sm-8">
+                                            <div class="form-group">
+                                                <input type="number" class="form-control" placeholder="Max Profit Daily">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <label class="col-sm-4 col-form-label">Max Orders in same Time</label>
+                                        <div class="col-sm-8">
+                                            <div class="form-group">
+                                                <input type="number" class="form-control" placeholder="Max Orders in same Time">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <label class="col-sm-4 col-form-label">Comment Order</label>
+                                        <div class="col-sm-8">
+                                            <div class="form-group">
+                                                <input type="text" class="form-control" placeholder="Comment Order">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <label class="col-sm-4 col-form-label">Date Start: </label>
+                                        <div class="col-sm-8">
+                                            <div class="form-group">
+                                                <input type="text" class="form-control date-picker" placeholder="Date Start">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <label class="col-sm-4 col-form-label">Date Finish: </label>
+                                        <div class="col-sm-8">
+                                            <div class="form-group">
+                                                <input type="text" class="form-control date-picker" placeholder="Date Finish">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <label class="col-sm-4 col-form-label">String for upload Ranking</label>
+                                        <div class="col-sm-8">
+                                            <div class="form-group">
+                                                <input type="text" class="form-control" placeholder="String for upload Ranking">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <label class="col-sm-4 col-form-label">Allow External Control? </label>
+                                        <div class="col-sm-8">
+                                            <div class="form-group">
+                                                <select class="form-control">
+                                                    <option style="background: black">TRUE</option>
+                                                    <option style="background: black">FALSE</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <label class="col-sm-4 col-form-label">Which Syncronize?</label>
+                                        <div class="col-sm-8">
+                                            <div class="form-group">
+                                                <select class="form-control">
+                                                    <option style="background: black">Name</option>
+                                                    <option style="background: black">Balance</option>
+                                                    <option style="background: black">Account Name</option>
+                                                    <option style="background: black">Actual Position Ranking</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <label class="col-sm-4 col-form-label">Server Connect MT4/MT5</label>
+                                        <div class="col-sm-8">
+                                            <div class="form-group">
+                                                <select class="form-control">
+                                                    <option style="background: black">ACTIV</option>
+                                                    <option style="background: black">LMAX</option>
+                                                    <option style="background: black">SAXO</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="text-center">
+                                        <button type="reset" class="btn btn-danger mt-5 w-25 mr-5">Cancel</button>
+                                        <button type="submit" class="btn btn-success mt-5 w-25">Create</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="active" role="tabpanel">
+                            <table id="" class="table table-bordered">
+                                <thead>
+                                <tr>
+                                    <th style="color: yellow">Name</th>
+                                    <th style="color: yellow">Start Date</th>
+                                    <th style="color: yellow">Finish Date</th>
+                                    <th style="color: yellow">See Ranking</th>
+                                    <th style="color: yellow">Edit Championship</th>
+                                    <th style="color: yellow">Show Participants</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td>Championship1</td>
+                                    <td>20/10/2019</td>
+                                    <td>20/11/2019</td>
+                                    <td>Open</td>
+                                    <td><a href="#">Edit Configuration</a></td>
+                                    <td><a href="#">Show</a></td>
+                                </tr>
+                                <tr>
+                                    <td>Championship2</td>
+                                    <td>20/10/2019</td>
+                                    <td>20/11/2019</td>
+                                    <td>Open</td>
+                                    <td><a href="#">Edit Configuration</a></td>
+                                    <td><a href="#">Show</a></td>
+                                </tr>
+                                <tr>
+                                    <td>Championship3</td>
+                                    <td>20/10/2019</td>
+                                    <td>20/11/2019</td>
+                                    <td>Open</td>
+                                    <td><a href="#">Edit Configuration</a></td>
+                                    <td><a href="#">Show</a></td>
+                                </tr>
+                                <tr>
+                                    <td>Championship4</td>
+                                    <td>20/10/2019</td>
+                                    <td>20/11/2019</td>
+                                    <td>Open</td>
+                                    <td><a href="#">Edit Configuration</a></td>
+                                    <td><a href="#">Show</a></td>
+                                </tr>
+
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="tab-pane" id="fininshed" role="tabpanel">
+                            <table id="" class="table table-bordered">
+                                <thead>
+                                <tr>
+                                    <th style="color: yellow">POS</th>
+                                    <th style="color: yellow">Name</th>
+                                    <th style="color: yellow">Start Date</th>
+                                    <th style="color: yellow">Finish Date</th>
+                                    <th style="color: yellow">Acc Champion</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td>Championship1</td>
+                                    <td>20/10/2019</td>
+                                    <td>20/11/2019</td>
+                                    <td>113258</td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td>Championship2</td>
+                                    <td>20/10/2019</td>
+                                    <td>20/11/2019</td>
+                                    <td>113258</td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
+                                    <td>Championship3</td>
+                                    <td>20/10/2019</td>
+                                    <td>20/11/2019</td>
+                                    <td>113258</td>
+                                </tr>
+                                <tr>
+                                    <td>4</td>
+                                    <td>Championship4</td>
+                                    <td>20/10/2019</td>
+                                    <td>20/11/2019</td>
+                                    <td>113258</td>
+                                </tr>
+                                <tr>
+                                    <td>5</td>
+                                    <td>Championship5</td>
+                                    <td>20/10/2019</td>
+                                    <td>20/11/2019</td>
+                                    <td>113258</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="tab-pane" id="search" role="tabpanel">
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<% include ../partials/footer.ejs %>
+<% include ../partials/foot.ejs %>
+
+</body>
+</html>

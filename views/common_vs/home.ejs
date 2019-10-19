@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<% include ../partials/head.ejs %>
+
+<body data-sa-theme="5">
+<% include ../partials/header.ejs %>
+<% include ../partials/sidebar.ejs %>
+
+<section class="content">
+    <div class="content__inner">
+        <header class="content__title">
+            <h1><%= i18n.__('Home') %></h1>
+        </header>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title text-center"><%= i18n.__('LATEST TRANSACTIONS') %></h4>
+                        <div class="table-responsive">
+                            <table class="table table-bordered mb-0">
+                                <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Shop</th>
+                                    <th>Product</th>
+                                    <th>Price</th>
+                                    <th>Profit</th>
+                                    <th>Date and time</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <th scope="row">1</th>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">2</th>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">3</th>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row col-md-6">
+                <div class="col-md-4">
+                    <div class="quick-stats__item">
+                        <div class="quick-stats__info">
+                            <h5 style="text-align: center;white-space: normal;"><%= i18n.__('QUANTITY OF ORDERS TODAY') %></h5>
+                            <small style="text-align: center;">15</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-8">
+                    <div class="quick-stats__item">
+                        <div class="quick-stats__info">
+                            <div class="form-group">
+                                <h5 class="text-center">Your system message</h5>
+                            </div>
+                            <div class="md-0">
+                                <% if (adminMessage) { %>
+                                <p><%= adminMessage.subject %></p>
+                                <p><%= adminMessage.content %></p>
+                                <% } else { %>
+                                    <p><%= i18n.__("There is not administrator's messages") %></p>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="quick-stats__item">
+                    <div class="quick-stats__info">
+                        <h2>Turnover achieved</h2>
+                        <small>1. Today's sales:</small>
+                        <small>2. This week:</small>
+                        <small>3. This month:</small>
+                        <small>4. Current year:</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="quick-stats__item">
+                    <div class="quick-stats__info">
+                        <h2>Earned profits</h2>
+                        <small>1. Today's sales:</small>
+                        <small>2. This week:</small>
+                        <small>3. This month:</small>
+                        <small>4. Current year:</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="quick-stats__item">
+                    <div class="quick-stats__info">
+                        <h2>Number of visitors</h2>
+                        <small>1. Today's sales:</small>
+                        <small>2. This week:</small>
+                        <small>3. This month:</small>
+                        <small>4. Current year:</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="quick-stats__item">
+                    <div class="quick-stats__info">
+                        <h2>Value of disputes lost</h2>
+                        <small>1. Today's sales:</small>
+                        <small>2. This week:</small>
+                        <small>3. This month:</small>
+                        <small>4. Current year:</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-12 col-md-7">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Growth Rate</h4>
+                        <h6 class="card-subtitle">Commodo luctus nisi erat porttitor ligula eget lacinia odio semnec</h6>
+
+                        <div class="flot-chart flot-line"></div>
+                        <div class="flot-chart-legends flot-chart-legends--line"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-5">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">SHOP RANKING (calendar month)</h4>
+                        <div class="row">
+                            <div class="col-4" style="display: block;text-align: center">
+                                <label class="jwg_circle">1</label>
+                                <br/>
+                                <p>BONUS-300zt</p>
+                            </div>
+                            <div class="col-4" style="display: block;text-align: center">
+                                <label class="jwg_circle">2</label>
+                                <br/>
+                                <p>BONUS-200zt</p>
+                            </div>
+                            <div class="col-4" style="display: block;text-align: center">
+                                <label class="jwg_circle">3</label>
+                                <br/>
+                                <p>BONUS-100zt</p>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-bordered mb-0">
+                                <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Store name and address</th>
+                                    <th>Income</th>
+                                    <th>Profit</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <th scope="row">1</th>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">2</th>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">3</th>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+
+<% include ../partials/footer.ejs %>
+<% include ../partials/foot.ejs %>
+
+</body>
+</html>

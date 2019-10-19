@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<% include ../partials/head.ejs %>
+<style>
+    #groups-table th, #groups-table td {
+        text-align: center;
+    }
+    input[name="groupRadio"] {
+        position: relative;
+    }
+</style>
+<body data-sa-theme="5">
+<% include ../partials/header.ejs %>
+<% include ../partials/sidebar.ejs %>
+
+<section class="content">
+    <div class="content__inner">
+        <header class="content__title">
+            <h1><%= i18n.__('Users') %></h1>
+        </header>
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title"><%= i18n.__('DEFINE THE RIGHTS OF USERS') %></h4>
+
+                <div class="table-responsive data-table">
+                    <table id="users-table" class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th>NO</th>
+                            <th>USER</th>
+                            <th>EMAIL</th>
+                            <th>PHONE</th>
+                            <th>GROUP</th>
+                            <th>ADDITIONAL RIGHTS</th>
+                            <th>EDITION</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <% for (let k = 0; k < users.length; k++) { %>
+                            <tr id="<%= users[k].id %>">
+                                <td class="user-number"><%= k + 1 %></td>
+                                <td class="user-name"><%= users[k].first_name + ' ' + users[k].last_name %></td>
+                                <td class="user-email"><%= users[k].email %></td>
+                                <td class="user-phone"><%= users[k].phone %></td>
+
+                                <% if (groups.find(x => x.id == users[k].group_id)) {%>
+                                    <td class="user-group" data-id="<%= groups.find(x => x.id == users[k].group_id).id %>"><%= groups.find(x => x.id == users[k].group_id).name %></td>
+                                <%} else {%>
+                                    <td class="user-group" data-id=""></td>
+                                <%}%>
+
+                                <td class="user-rights">1</td>
+                                <td><a href="javascript:" onclick="openUserModal('<%= users[k].id %>')">Change Permission</a></td>
+                            </tr>
+                        <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- change group of user -->
+<div class="modal fade" id="modal-user" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Change group of user</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="modal_user_id" value="">
+                <p>User Name: <span id="modal_user_name"></span></p>
+                <% for (let i = 0; i < groups.length; i++) { %>
+                    <div class="custom-control custom-radio mb-2">
+                        <input type="radio" id="edit_<%= groups[i].id %>" name="groupRadio" class="custom-control-input">
+                        <label class="custom-control-label" for="edit_<%= groups[i].id %>"><%= groups[i].name %></label>
+                    </div>
+                <% } %>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link" onclick="submitChangeUser()">Save changes</button>
+                <button type="button" class="btn btn-link" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<% include ../partials/footer.ejs %>
+<% include ../partials/foot.ejs %>
+<script>
+    $(document).ready(function () {
+        $("#users-table").DataTable({
+            aaSorting: [],
+            autoWidth: !1,
+            responsive: !0,
+            lengthMenu: [[15, 40, 100, -1], ["15 Rows", "40 Rows", "100 Rows", "Everything"]],
+            language: {searchPlaceholder: "Search for records..."},
+            sDom: '<"dataTables__top"flB<"dataTables_actions">>rt<"dataTables__bottom"ip><"clear">',
+            buttons: [{extend: "excelHtml5", title: "Export Data"}, {extend: "csvHtml5", title: "Export Data"}, {extend: "print", title: "Material Admin"}],
+            initComplete: function () {
+                let html = '<i class="zwicon-more-h" data-toggle="dropdown"></i>' +
+                    '<div class="dropdown-menu dropdown-menu-right">' +
+                    // '<a data-table-action="print" class="dropdown-item">Print</a>' +
+                    '<a data-table-action="fullscreen" class="dropdown-item">Fullscreen</a>' +
+                    // '<a data-table-action="excel" class="dropdown-item">Excel (.xlsx)</a>' +
+                    // '<a data-table-action="csv" class="dropdown-item">CSV (.csv)</a>' +
+                    '</div>';
+                $(".dataTables_actions").html(html)
+            }
+        });
+        $("body").on("click", "[data-table-action]", function (e) {
+            e.preventDefault();
+            let t = $(this).data("table-action");
+            if ("excel" === t && $("#users-table_wrapper").find(".buttons-excel").click(), "csv" === t && $("#users-table_wrapper").find(".buttons-csv").click(), "print" === t && $("#users-table_wrapper").find(".buttons-print").click(), "fullscreen" === t) {
+                let a = $(this).closest(".card");
+                a.hasClass("card--fullscreen") ? (a.removeClass("card--fullscreen"), $('body').removeClass("data-table-toggled")) : (a.addClass("card--fullscreen"), $('body').addClass("data-table-toggled"))
+            }
+        });
+    });
+    let groups = JSON.parse(`<%- JSON.stringify(groups) %>`);
+    function openUserModal(id) {
+        let name = $('#' + id + ' .user-name').html();
+        let group_id = $('#' + id + ' .user-group').attr('data-id');
+        $('#modal_user_id').val(id);
+        $('#modal_user_name').html(name);
+        $('#edit_' + group_id).prop('checked', true);
+        $('#modal-user').modal();
+    }
+    function submitChangeUser() {
+        let user_id = $('#modal_user_id').val();
+        let group_id = $('input[name="groupRadio"]:checked').attr('id').replace('edit_', '');
+        if (!user_id || !group_id) return;
+        let url = '/user/users/edit';
+        let data = {
+            user_id: user_id,
+            group_id: group_id
+        };
+        $.ajax({
+            url: url,
+            method: 'post',
+            data: data,
+            success: function (res) {
+                if (res.status === 'success') {
+                    customAlert(res.message, true);
+                    setTimeout(function () {
+                        location.reload();
+                    }, 2000);
+                } else customAlert(res.message);
+            }
+        })
+    }
+</script>
+</body>
+</html>

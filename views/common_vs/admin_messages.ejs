@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<% include ../partials/head.ejs %>
+
+<body data-sa-theme="5">
+<% include ../partials/header.ejs %>
+<% include ../partials/sidebar.ejs %>
+
+<section class="content">
+    <div class="content__inner">
+        <header class="content__title">
+            <h1><%= i18n.__('Admin Message') %></h1>
+        </header>
+        <div class="row">
+            <div class="col-md-3"></div>
+            <div class="col-md-6">
+                <div class="card-demo">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <div class="form-group">
+                                <h4><%= i18n.__('Post Message') %></h4>
+                            </div>
+                            <div class="form-group">
+                                <input type="text" class="form-control" id="admin_message_subject" placeholder="<%= i18n.__('Subject') %>">
+                            </div>
+                            <div class="form-group">
+                                <textarea class="form-control" id="admin_message_content" placeholder="<%= i18n.__('Content') %>"></textarea>
+                            </div>
+                            <button class="btn btn-outline-theme" onclick="postAdminMessage()"><%= i18n.__('Post Message') %></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3"></div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title"><%= i18n.__('History of messages') %></h4>
+                <div class="table-responsive data-table">
+                    <table id="messages-table" class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th style="width: 10%"><%= i18n.__('NO') %></th>
+                            <th style="width: 20%"><%= i18n.__('DATE') %></th>
+                            <th style="width: 50%"><%= i18n.__('TOPIC') %></th>
+                            <th style="width: 20%"><%= i18n.__('ACTION') %></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <% for (let i = 0; i < admin_messages.length; i++) { %>
+                            <tr>
+                                <td><%= i + 1 %></td>
+                                <td><%= admin_messages[i].created_at.toLocaleDateString() %></td>
+                                <td><%= admin_messages[i].subject %></td>
+                                <td class="admin-message-actions">
+                                    <i class="zwicon-eye" onclick="viewMessage('<%= admin_messages[i].id %>')"></i>
+                                    <i class="zwicon-edit-square" onclick="editMessage('<%= admin_messages[i].id %>')"></i>
+                                    <i class="zwicon-trash" onclick="deleteMessage('<%= admin_messages[i].id %>')"></i>
+                                </td>
+                            </tr>
+                        <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- view message modal -->
+<div class="modal fade" id="modal_admin_message" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <input type="hidden" id="modal_admin_message_id">
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <input type="text" class="form-control" id="modal_admin_message_subject">
+                </div>
+                <div class="form-group">
+                    <textarea class="form-control" id="modal_admin_message_content"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-warning" id="edit_message_btn"><%= i18n.__('Edit Message') %></button>
+                <button class="btn btn-theme" data-dismiss="modal"><%= i18n.__('Close') %></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- remove message modal -->
+<div class="modal fade" id="modal_delete_message" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header"></div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <i class="zwicon-info-circle" style="font-size: 7rem"></i>
+                </div>
+                <div class="form-group">
+                    <h3><%= i18n.__('Are you sure to remove?') %></h3>
+                </div>
+                <input type="hidden" id="modal_delete_message_id">
+                <button type="button" class="btn btn-link" onclick="deleteMessageBtn()"><%= i18n.__('Remove')%></button>
+                <button type="button" class="btn btn-link" data-dismiss="modal"><%= i18n.__('Cancel') %></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<% include ../partials/footer.ejs %>
+<% include ../partials/foot.ejs %>
+<script>
+    $(document).ready(function () {
+        $("#messages-table").DataTable({
+            aaSorting: [],
+            autoWidth: !1,
+            responsive: !0,
+            lengthMenu: [[15, 40, 100, -1], ["15 Rows", "40 Rows", "100 Rows", "Everything"]],
+            language: {searchPlaceholder: "Search for records..."},
+            sDom: '<"dataTables__top"flB<"dataTables_actions">>rt<"dataTables__bottom"ip><"clear">',
+            buttons: [{extend: "excelHtml5", title: "Export Data"}, {extend: "csvHtml5", title: "Export Data"}, {extend: "print", title: "Material Admin"}],
+            initComplete: function () {
+                let html = '<i class="zwicon-more-h" data-toggle="dropdown"></i>' +
+                    '<div class="dropdown-menu dropdown-menu-right">' +
+                    '<a data-table-action="print" class="dropdown-item">Print</a>' +
+                    '<a data-table-action="fullscreen" class="dropdown-item">Fullscreen</a>' +
+                    '<a data-table-action="excel" class="dropdown-item">Excel (.xlsx)</a>' +
+                    '<a data-table-action="csv" class="dropdown-item">CSV (.csv)</a>' +
+                    '</div>';
+                $(".dataTables_actions").html(html)
+            }
+        });
+        $("body").on("click", "[data-table-action]", function (e) {
+            e.preventDefault();
+            let t = $(this).data("table-action");
+            if ("excel" === t && $("#messages-table_wrapper").find(".buttons-excel").click(), "csv" === t && $("#messages-table_wrapper").find(".buttons-csv").click(), "print" === t && $("#messages-table_wrapper").find(".buttons-print").click(), "fullscreen" === t) {
+                let a = $(this).closest(".card");
+                a.hasClass("card--fullscreen") ? (a.removeClass("card--fullscreen"), $('body').removeClass("data-table-toggled")) : (a.addClass("card--fullscreen"), $('body').addClass("data-table-toggled"))
+            }
+        });
+    });
+    let messages = [
+        '<%= i18n.__("Message is not valid") %>',  // 0
+        '<%= i18n.__("") %>',  // 1
+        '<%= i18n.__("") %>',  // 2
+    ];
+    function postAdminMessage() {
+        let subject = $('#admin_message_subject').val();
+        let content = $('#admin_message_content').val();
+        if (!subject || !content) {
+            customAlert(messages[0]);
+            return;
+        }
+        $.ajax({
+            url: '/user/post-admin-messages',
+            method: 'post',
+            data: {
+                subject: subject,
+                content: content
+            },
+            success: function (res) {
+                if (res.status === 'success') {
+                    customAlert(res.message, true);
+                    message_socket_connection.send(JSON.stringify({
+                        message_section: 'admin-message',
+                        message_store: 'all-store',
+                        message_subject: subject,
+                        message_content: content,
+                        message_from: 'administrator',
+                        message_to: 'all'
+                    }))
+                    setTimeout(function () {
+                        location.reload()
+                    }, 2000)
+                } else customAlert(res.message);
+            }
+        })
+    }
+    function viewMessage(id) {
+        $.ajax({
+            url: '/user/get-admin-message',
+            method: 'post',
+            data: {
+                message_id: id,
+                type: 'get'
+            },
+            success: function (res) {
+                if (res.status === 'success') {
+                    $('#modal_admin_message_id').val(id);
+                    $('#modal_admin_message_subject').val(res.data.subject);
+                    $('#modal_admin_message_subject').prop('readonly', true);
+                    $('#modal_admin_message_content').val(res.data.content);
+                    $('#modal_admin_message_content').prop('readonly', true);
+                    $('#edit_message_btn').css('display', 'none')
+                    $('#modal_admin_message').modal();
+                } else customAlert(res.message);
+            }
+        });
+    }
+    function editMessage(id) {
+        $.ajax({
+            url: '/user/get-admin-message',
+            method: 'post',
+            data: {
+                message_id: id,
+                type: 'get'
+            },
+            success: function (res) {
+                if (res.status === 'success') {
+                    $('#modal_admin_message_id').val(id);
+                    $('#modal_admin_message_subject').val(res.data.subject);
+                    $('#modal_admin_message_subject').prop('readonly', false);
+                    $('#modal_admin_message_content').val(res.data.content);
+                    $('#modal_admin_message_content').prop('readonly', false);
+                    $('#edit_message_btn').css('display', 'block')
+                    $('#modal_admin_message').modal();
+                } else customAlert(res.message);
+            }
+        });
+    }
+    function deleteMessage(id) {
+        $('#modal_delete_message_id').val(id);
+        $('#modal_delete_message').modal();
+    }
+    function deleteMessageBtn() {
+        let message_id = $('#modal_delete_message_id').val();
+        $.ajax({
+            url: '/user/post-admin-message-edit',
+            method: 'post',
+            data: {
+                message_id: message_id,
+                type: 'delete'
+            },
+            success: function (res) {
+                if (res.status === 'success') {
+                    customAlert(res.message, true);
+                    setTimeout(function () {
+                        location.reload()
+                    }, 2000)
+                } else customAlert(res.message);
+            }
+        });
+    }
+    $('#edit_message_btn').on('click', function () {
+        let message_id = $('#modal_admin_message_id').val();
+        let message_subject = $('#modal_admin_message_subject').val();
+        let message_content = $('#modal_admin_message_content').val();
+        if (!message_subject || !message_content) {
+            customAlert(messages[0]);
+            return;
+        }
+        $.ajax({
+            url: '/user/post-admin-message-edit',
+            method: 'post',
+            data: {
+                type: 'edit',
+                message_id: message_id,
+                message_subject: message_subject,
+                message_content: message_content
+            },
+            success: function (res) {
+                if (res.status === 'success') {
+                    customAlert(res.message, true);
+                    $('#modal_admin_message').modal('toggle');
+                    setTimeout(function () {
+                        location.reload()
+                    }, 2000);
+                } else customAlert(res.message);
+            }
+        })
+    });
+</script>
+</body>
+</html>

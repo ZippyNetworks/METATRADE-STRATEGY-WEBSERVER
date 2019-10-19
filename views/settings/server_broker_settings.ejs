@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<% include ../partials/head.ejs %>
+<style>
+    .select2-container--open{
+        z-index: 9999;
+    }
+</style>
+<body data-sa-theme="5">
+<% include ../partials/header.ejs %>
+<% include ../partials/sidebar.ejs %>
+
+<section class="content">
+    <div class="content__inner">
+        <header class="content__title">
+            <h1><%= i18n.__('Server Broker Settings') %></h1>
+        </header>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="py-3 text-right">
+                    <button type="button" class="btn btn-success" onclick="addNewServerBroker()">Register New Broker</button>
+                </div>
+                <div class="table-responsive data-table">
+                    <table id="data-table" class="table table-bordered text-center">
+                        <thead>
+                        <tr>
+                            <th style="color: yellow">Broker Name</th>
+                            <th style="color: yellow">Broker IP</th>
+                            <th style="color: yellow">Remove</th>
+                        </tr>
+                        </thead>
+                        <tbody id="server_broker_list">
+                        <% for (let i = 0; i < brokers.length; i++) {%>
+                        <tr id="<%= brokers[i].id%>">
+                            <td><%=brokers[i].server_name%></td>
+                            <td><%=brokers[i].server_ip%></td>
+                            <td><a href="#" onclick="removeServerBroker('<%= brokers[i].id%>')">Remove</a></td>
+                        </tr>
+                        <%}%>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Add New Server Broker -->
+<div class="modal fade" id="modal-new-server-broker" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">New Server Broker</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <div class="row">
+                        <label class="col-sm-4 col-form-label">Server Name</label>
+                        <div class="col-sm-8">
+                            <div class="form-group">
+                                <input type="text" class="form-control" id="server_broker_name" placeholder="Server Name" required />
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-4 col-form-label">Server IP</label>
+                        <div class="col-sm-8">
+                            <div class="form-group">
+                                <input type="text" class="form-control" id="server_broker_ip" placeholder="Server IP" required />
+                                <div class="invalid-feedback">Please provide a valid input</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-theme" onclick="submitAddServerBroker()"><%= i18n.__('Add Server') %></button>
+                <button type="button" class="btn btn-theme" data-dismiss="modal"><%= i18n.__('Cancel') %></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- remove modal -->
+<div class="modal fade" id="modal_delete_message" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header"></div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <i class="zwicon-info-circle" style="font-size: 7rem"></i>
+                </div>
+                <div class="form-group">
+                    <h3><%= i18n.__('Are you sure to remove?') %></h3>
+                </div>
+                <input type="hidden" id="modal_delete_type">
+                <input type="hidden" id="modal_delete_id">
+                <button type="button" class="btn btn-link" onclick="onDeleteBtn()"><%= i18n.__('Remove')%></button>
+                <button type="button" class="btn btn-link" data-dismiss="modal"><%= i18n.__('Cancel') %></button>
+            </div>
+        </div>
+    </div>
+</div>
+<% include ../partials/footer.ejs %>
+<% include ../partials/foot.ejs %>
+<script>
+    function addNewServerBroker(){
+        $('#modal-new-server-broker').find('input').each(function () {
+            if ($(this).prop('required')){
+                $(this).removeClass('is-invalid');
+            }
+        });
+        $('#modal-new-server-broker').modal();
+    }
+    function removeServerBroker(id){
+        $('#modal_delete_id').val(id);
+        $('#modal_delete_message').modal();
+
+    }
+    function submitAddServerBroker(){
+        let bValid = true;
+        $('#modal-new-server-broker').find('input').each(function () {
+            if ($(this).prop('required') && ($(this).val()==null || $(this).val()=="")){
+                $(this).addClass('is-invalid');
+                bValid = false;
+            } else {
+                $(this).removeClass('is-invalid');
+            }
+        });
+        if (!bValid) return;
+
+        let server_broker_name = $('#server_broker_name').val();
+        let server_broker_ip = $('#server_broker_ip').val();
+        let url = '/user/editServerBroker';
+        let data = {
+            server_broker_name: server_broker_name,
+            server_broker_ip: server_broker_ip,
+
+            type: 'add',
+        };
+
+        $.ajax({
+            url: url,
+            method: 'post',
+            data: data,
+            success: function (res) {
+                if (res.status === 'success') {
+                    let new_server_broker = res.new_server_broker;
+                    customAlert(res.message, true);
+                    $('#server_broker_list .odd[role!="row"]').remove();
+                    $('#server_broker_list').append(
+                        '<tr id="'+ new_server_broker.id +'">\n' +
+                        '<td>'+ new_server_broker.server_name +'</td>\n' +
+                        '<td>'+ new_server_broker.server_ip +'</td>\n' +
+                        '<td><a href="#" onclick="removeServerBroker(\''+ new_server_broker.id +'\')">Remove</a></td>\n' +
+                        '</tr>');
+                    $('#modal-new-server-broker').modal("hide");
+                } else customAlert(res.message);
+            }
+        })
+    }
+    function onDeleteBtn() {
+        let server_broker_id = $('#modal_delete_id').val();
+        let url = '/user/editServerBroker';
+        let data = {
+            server_broker_id: server_broker_id,
+            type: 'delete',
+        };
+        $.ajax({
+            url: url,
+            method: 'post',
+            data: data,
+            success: function (res) {
+                if (res.status === 'success') {
+                    customAlert(res.message, true);
+                    $('#' + server_broker_id).remove();
+                    $('#modal_delete_message').modal("hide");
+                } else customAlert(res.message);
+            }
+        })
+    }
+</script>
+</body>
+</html>
